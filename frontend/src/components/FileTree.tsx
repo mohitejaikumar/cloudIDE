@@ -8,11 +8,13 @@ export default function FileTree({
     isOpen,
     getFilesIncrementally,
     currentDir,
+    getFileContent,
 }:{
     fileTree:IFileTree,
     isOpen:boolean,
     getFilesIncrementally:(dirPath:string)=>void,
-    currentDir:string
+    currentDir:string,
+    getFileContent:(filePath:string)=>void
 }){
     
 
@@ -31,11 +33,16 @@ export default function FileTree({
                                     getFilesIncrementally={getFilesIncrementally}
                                     currentDir={currentDir}
                                     isOpen={isOpen}
+                                    getFileContent={getFileContent}
                                 />
                                 </>
                                 :
                                 <>
-                                    <div key={index} className="pl-2 py-1 bg-gray-400  cursor-pointer" >
+                                    <div 
+                                        key={index} 
+                                        className="w-full ml-3 px-2 py-1 my-1 bg-gray-400  cursor-pointer"
+                                        onClick={()=>{getFileContent(currentDir + '/' + fileTreeItem.name)}}
+                                    >
                                         {fileTreeItem.name}
                                     </div>
                                 </>
@@ -56,7 +63,7 @@ function Subtree({
     getFilesIncrementally,
     currentDir,
     isOpen,
-
+    getFileContent
 }:{
     fileTreeItem:{
         name:string,
@@ -67,7 +74,8 @@ function Subtree({
     children:IFileTree,
     getFilesIncrementally:(dirPath:string)=>void,
     currentDir:string,
-    isOpen:boolean
+    isOpen:boolean,
+    getFileContent:(filePath:string)=>void
 }){
     const [open , setOpen] = useState(isOpen);
     const handleOnClick = (dirname:string)=>{
@@ -89,6 +97,7 @@ function Subtree({
                 isOpen={false}
                 getFilesIncrementally={getFilesIncrementally}
                 currentDir={currentDir + "/" + fileTreeItem.name}
+                getFileContent={getFileContent}
             />}
         </div>
     )

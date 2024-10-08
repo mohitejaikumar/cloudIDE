@@ -21,7 +21,7 @@ export default function Terminal(){
         console.log("hi");
 
         const term = new XTerminal({
-            rows:18,
+            rows:15,
             
         });
 
@@ -30,11 +30,23 @@ export default function Terminal(){
         
         term.onData((data)=>{
             console.log(data + "enter press to karne de ");
-            socket.send(data);
+            socket.send(JSON.stringify({
+                type:'terminal',
+                data:data
+            }));
         });
 
         socket.onmessage = (event)=>{
-            term.write(event.data);
+            const payload = JSON.parse(event.data);
+
+            switch(payload.type){
+                case 'terminal':
+                    term.write(payload.data);
+                    break;
+                default:
+                    break;
+            }
+            
         }
         
     },[socket])

@@ -1,6 +1,8 @@
 import pty from 'node-pty';
 import os from 'os';
 import { WebSocket } from 'ws';
+import { appyPatchtoFile } from './helpers';
+import path from 'path';
 
 
 interface User{
@@ -34,7 +36,10 @@ class RoomManager{
             env: process.env
         });
         ptyProcess.onData((data) => {
-            socket.send(data);
+            socket.send(JSON.stringify({
+                type:'terminal',
+                data:data
+            }));
             console.log(`${userId} sent: %s`, data);
         });
         ptyProcess.onExit((exitCode)=>{
@@ -54,10 +59,30 @@ class RoomManager{
         
         const user = this.users.get(userId)!;
 
-        user.socket?.on('message',(data:string)=>{
+        user.socket?.on('message',async(data:string)=>{
             console.log('received: %s', data);
-            user.pty.write(data);
-            console.log(user.pty.pid);
+            const payload = JSON.parse(data);
+            switch(payload.type){
+                case 'terminal':{
+                    user.pty.write(payload.data);
+                    console.log(user.pty.pid);
+                    break;
+                }
+                case 'filePatch':{
+                    this.users.forEach((u)=>{
+                        if(u.id !== userId){
+                            u.socket.send(JSON.stringify({
+                                type:'filePatch',
+                                data:payload.data,
+                                filePath:payload.filePath
+                            }))
+                        }
+                    })
+                    await appyPatchtoFile(path.join(__dirname,path.join('..' , payload.filePath)),payload.data);
+                    
+                }
+                    
+            }
         })
     }
 }

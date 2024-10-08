@@ -13,7 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFilesIncrementally = exports.getAllFiles = void 0;
+exports.getFileLanguage = getFileLanguage;
+exports.appyPatchtoFile = appyPatchtoFile;
 const promises_1 = __importDefault(require("fs/promises"));
+const path_1 = __importDefault(require("path"));
+const diff_1 = require("diff");
 const getAllFiles = (dirPath) => __awaiter(void 0, void 0, void 0, function* () {
     let fileTree = {};
     const result = yield promises_1.default.readdir(dirPath);
@@ -66,3 +70,33 @@ const getFilesIncrementally = (dirPath, currentDir) => __awaiter(void 0, void 0,
     };
 });
 exports.getFilesIncrementally = getFilesIncrementally;
+function getFileLanguage(filePath) {
+    const extension = path_1.default.extname(filePath);
+    switch (extension) {
+        case '.js':
+            return 'JavaScript';
+        case '.html':
+            return 'HTML';
+        case '.css':
+            return 'CSS';
+        case '.java':
+            return 'Java';
+        case '.py':
+            return 'Python';
+        case '.ts':
+            return 'TypeScript';
+        case '.php':
+            return 'PHP';
+        default:
+            return 'Unknown Language';
+    }
+}
+function appyPatchtoFile(filePath, patch) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const originalFileContent = yield promises_1.default.readFile(filePath);
+        const patchedFileContent = (0, diff_1.applyPatch)(originalFileContent.toString(), patch,{ autoConvertLineEndings: true });
+        console.log("patchedData", patchedFileContent);
+        if (patchedFileContent)
+            yield promises_1.default.writeFile(filePath, patchedFileContent);
+    });
+}

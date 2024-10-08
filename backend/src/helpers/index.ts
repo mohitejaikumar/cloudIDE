@@ -1,6 +1,8 @@
 
 import fs from 'fs/promises';
 import { IFileTree } from './types';
+import path from 'path';
+import { applyPatch } from 'diff';
 
 
 
@@ -52,10 +54,42 @@ export const getFilesIncrementally = async(dirPath:string , currentDir:string):P
     }
     
     return {
-        currentDir:{
+        [currentDir]:{
             name:currentDir,
             type:"dir",
             children:fileTree
         }
     }
+}
+
+export function getFileLanguage(filePath:string) {
+    const extension = path.extname(filePath);
+
+    switch (extension) {
+        case '.js':
+            return 'JavaScript';
+        case '.html':
+            return 'HTML';
+        case '.css':
+            return 'CSS';
+        case '.java':
+            return 'Java';
+        case '.py':
+            return 'Python';
+        case '.ts':
+            return 'TypeScript';
+        case '.php':
+            return 'PHP';
+        default:
+            return 'Unknown Language';
+    }
+}
+
+export async function appyPatchtoFile(filePath:string, patch:string){
+    
+    const originalFileContent = await fs.readFile(filePath);
+    //@ts-ignore
+    const patchedFileContent = applyPatch(originalFileContent.toString() , patch ,{ autoConvertLineEndings: true });
+    if(patchedFileContent)
+        await fs.writeFile(filePath , patchedFileContent);
 }
