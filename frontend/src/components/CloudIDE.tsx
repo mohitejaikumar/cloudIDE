@@ -21,38 +21,49 @@ export default function CloudIDE() {
             return newDepthFileTree;
         }
         const nextDir = finalDirPath.split('/')[index];
-        let newFileTree = {};
+        const parentDir = finalDirPath.split('/')[index-1];
+        const newFileTree:IFileTree = {
+            [parentDir]:{
+                name:parentDir,
+                type:'dir',
+                children:{}
+            }
+        };
+        console.log(index , currentDirPath , finalDirPath , newDepthFileTree , newFileTree);
+        console.log(nextDir);
         Object.keys(currentFileTree).forEach(fileTreeItem=>{
             if(fileTreeItem === nextDir){
-                newFileTree = {...newFileTree , ...updateFileTree(index+1 , currentDirPath + '/' +nextDir , finalDirPath , newDepthFileTree , currentFileTree[fileTreeItem].children || {})}
+                newFileTree[parentDir].children = {...newFileTree[parentDir].children , ...updateFileTree(index+1 , currentDirPath + '/' +nextDir , finalDirPath , newDepthFileTree , currentFileTree[fileTreeItem].children || {})}
             }
             else{
-                newFileTree = {...newFileTree , ...currentFileTree[fileTreeItem]}
+                newFileTree[parentDir].children = {...newFileTree[parentDir].children , 
+                    [fileTreeItem]:currentFileTree[fileTreeItem]
+                }
             }
+            console.log(newFileTree);
         })
-        console.log(index , currentDirPath , finalDirPath , newDepthFileTree , currentFileTree);
         return newFileTree;
     }
 
     const getFilesIncrementally = async(dirPath:string)=>{
         const result = await axios.get('http://localhost:3000/files?dirPath='+dirPath);
-        setFileTree(updateFileTree(1 , '/user' , dirPath , result.data , fileTree));
+        const newFileTree = updateFileTree(2 , '/user' , dirPath , result.data , fileTree['user'].children || {});
+        setFileTree(newFileTree);
         console.log(fileTree);
     }
 
     return (
         <div className="w-screen h-screen overflow-hidden">
             <div className="h-[60%] w-full flex ">
-                <div>
+                <div className="w-1/6 bg-slate-800 h-full overflow-y-auto custom-scrollbar">
                     <FileTree
                         fileTree={fileTree}
                         getFilesIncrementally={getFilesIncrementally}
-                        currentDir=''
+                        currentDir={''}
                         isOpen={false}
                     />
                 </div>
                 <div>
-
                 </div>
             </div>
             <Terminal />

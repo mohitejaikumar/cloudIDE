@@ -21,7 +21,7 @@ export default function Terminal(){
         console.log("hi");
 
         const term = new XTerminal({
-            rows:15,
+            rows:18,
             
         });
 
