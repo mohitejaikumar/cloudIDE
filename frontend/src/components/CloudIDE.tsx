@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import FileTree from "./FileTree";
 import Terminal from "./Terminal";
 import { IFileTree } from "../types";
@@ -11,11 +11,12 @@ import useSocket from '../hook/useSocket';
 export default function CloudIDE() {
 
     const editorRef = useRef(null);
-    const socket = useSocket();
+    const socket = useSocket("ws://localhost:8080");
     const [selectedFilePath , setSelectedFilePath] = useState<string | null>(null);
     const [selectedFileValue , setSelectedFileValue] = useState("");
     const [selectedFileLanguage , setSelectedFileLanguage] = useState("");
-    const [code , setCode] = useState(null);
+    const [code , setCode] = useState<string | null>(null);
+    const [currentOpenDir , setCurrentOpenDir] = useState<string>("");
 
     const [fileTree , setFileTree] = useState<IFileTree>({
         'user':{
@@ -24,6 +25,46 @@ export default function CloudIDE() {
             children:{}
         }
     });
+
+    const updateFileTree = useCallback((index:number ,currentDirPath:string , finalDirPath:string , newDepthFileTree:IFileTree , currentFileTree:IFileTree)=>{
+        
+        if(currentDirPath === finalDirPath){
+            return newDepthFileTree;
+        }
+        const nextDir = finalDirPath.split('/')[index];
+        const parentDir = finalDirPath.split('/')[index-1];
+        const newFileTree:IFileTree = {
+            [parentDir]:{
+                name:parentDir,
+                type:'dir',
+                children:{}
+            }
+        };
+        console.log(index , currentDirPath , finalDirPath , newDepthFileTree , newFileTree);
+        console.log(nextDir);
+        Object.keys(currentFileTree).forEach(fileTreeItem=>{
+            if(fileTreeItem === nextDir){
+                newFileTree[parentDir].children = {...newFileTree[parentDir].children , ...updateFileTree(index+1 , currentDirPath + '/' +nextDir , finalDirPath , newDepthFileTree , currentFileTree[fileTreeItem].children || {})}
+            }
+            else{
+                newFileTree[parentDir].children = {...newFileTree[parentDir].children , 
+                    [fileTreeItem]:currentFileTree[fileTreeItem]
+                }
+            }
+            console.log(newFileTree);
+        })
+        return newFileTree;
+    },[]);
+
+    const getFilesIncrementally = useCallback(async(dirPath:string)=>{
+        setSelectedFilePath(null);
+        const result = await axios.get('http://localhost:3000/files?dirPath='+dirPath);
+        const newFileTree = updateFileTree(2 , '/user' , dirPath , result.data , fileTree['user'].children || {});
+        setFileTree(newFileTree);
+        console.log(fileTree);
+        console.log("Dir ...............................",currentOpenDir);
+        console.log("Tree ....." , result.data , newFileTree);
+    },[updateFileTree,currentOpenDir,fileTree]);
     
     useEffect(()=>{
         if(socket==null) return;
@@ -42,12 +83,46 @@ export default function CloudIDE() {
                         setSelectedFileValue(patch);
                     break; 
                 }
+                case 'unlinkDir':
+                case ('addDir'):
+                {
+                    const path:string = payload.data;
+                    const dirs = path.split('\\');
+                    console.log(dirs);
+                    const startIndex = dirs.findIndex(item => item.includes('user'));
+                    let finalPath = "";
+                    // If 'user' is found, concatenate from that index onwards
+                    if (startIndex !== -1) {
+                        finalPath =  dirs.slice(startIndex,dirs.length -1).join('/');
+                    }
+                    console.log(finalPath);
+                    
+                    getFilesIncrementally("/"+finalPath);
+                    break;
+                }
+                case 'unlink':
+                case 'add':
+                {   
+                    const path:string = payload.data;
+                    const dirs = path.split('\\');
+                    console.log(dirs);
+                    const startIndex = dirs.findIndex(item => item.includes('user'));
+                    let finalPath = "";
+                    // If 'user' is found, concatenate from that index onwards
+                    if (startIndex !== -1) {
+                        finalPath =  dirs.slice(startIndex,dirs.length -1).join('/');
+                    }
+                    console.log(finalPath);
+                    
+                    getFilesIncrementally("/"+finalPath);
+                    break;
+                }
                 default:
                     break;
             }
         }
 
-    },[socket,selectedFileValue,selectedFilePath])
+    },[socket,selectedFileValue,selectedFilePath,getFilesIncrementally])
 
     useEffect(()=>{
         if(code === null) return;
@@ -55,6 +130,10 @@ export default function CloudIDE() {
             const patch = createPatch(selectedFilePath?.split('/').pop() || "temp.txt" , selectedFileValue , code);
             setSelectedFileValue(code);
             // console.log(patch);
+            if(selectedFilePath === null){
+                clearTimeout(timer);
+                return;
+            }
             socket?.send(JSON.stringify({
                 type:'filePatch',
                 data:patch,
@@ -89,42 +168,6 @@ export default function CloudIDE() {
     }  
 
 
-    function updateFileTree(index:number ,currentDirPath:string , finalDirPath:string , newDepthFileTree:IFileTree , currentFileTree:IFileTree){
-        
-        if(currentDirPath === finalDirPath){
-            return newDepthFileTree;
-        }
-        const nextDir = finalDirPath.split('/')[index];
-        const parentDir = finalDirPath.split('/')[index-1];
-        const newFileTree:IFileTree = {
-            [parentDir]:{
-                name:parentDir,
-                type:'dir',
-                children:{}
-            }
-        };
-        console.log(index , currentDirPath , finalDirPath , newDepthFileTree , newFileTree);
-        console.log(nextDir);
-        Object.keys(currentFileTree).forEach(fileTreeItem=>{
-            if(fileTreeItem === nextDir){
-                newFileTree[parentDir].children = {...newFileTree[parentDir].children , ...updateFileTree(index+1 , currentDirPath + '/' +nextDir , finalDirPath , newDepthFileTree , currentFileTree[fileTreeItem].children || {})}
-            }
-            else{
-                newFileTree[parentDir].children = {...newFileTree[parentDir].children , 
-                    [fileTreeItem]:currentFileTree[fileTreeItem]
-                }
-            }
-            console.log(newFileTree);
-        })
-        return newFileTree;
-    }
-
-    const getFilesIncrementally = async(dirPath:string)=>{
-        const result = await axios.get('http://localhost:3000/files?dirPath='+dirPath);
-        const newFileTree = updateFileTree(2 , '/user' , dirPath , result.data , fileTree['user'].children || {});
-        setFileTree(newFileTree);
-        console.log(fileTree);
-    }
 
     const getFileContent = async(filePath:string)=>{
         setSelectedFilePath(filePath);
@@ -139,16 +182,18 @@ export default function CloudIDE() {
     return (
         <div className="w-screen h-screen overflow-hidden">
             <div className="h-[65%] w-full flex ">
-                <div className="w-1/6 bg-slate-800 h-full overflow-y-auto custom-scrollbar">
+                <div className="w-[17%] bg-slate-800 h-full overflow-y-auto custom-scrollbar pb-6">
                     <FileTree
                         fileTree={fileTree}
                         getFilesIncrementally={getFilesIncrementally}
                         currentDir={''}
                         isOpen={false}
                         getFileContent={getFileContent}
+                        currentOpenDir={currentOpenDir}
+                        setCurrentOpenDir={setCurrentOpenDir}
                     />
                 </div>
-                <div className="h-full w-full">
+                <div className="h-full w-[83%]">
                     <Editor
                         height="100%"
                         theme="vs-dark"

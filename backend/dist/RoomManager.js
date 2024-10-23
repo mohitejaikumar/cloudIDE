@@ -16,10 +16,29 @@ const node_pty_1 = require("node-pty");
 const os_1 = __importDefault(require("os"));
 const helpers_1 = require("./helpers");
 const path_1 = __importDefault(require("path"));
+const chokidar_1 = __importDefault(require("chokidar"));
 var shell = os_1.default.platform() === 'win32' ? 'powershell.exe' : 'bash';
 class RoomManager {
     constructor() {
         this.users = new Map();
+        this.watcher = chokidar_1.default.watch(path_1.default.join(__dirname, "..", "user"));
+        // watcher eventListners
+        this.watcher.on('add', (path) => {
+            console.log(`File ${path} is added`);
+            this.sendWatcherEvent('add', path);
+        })
+            .on('unlink', (path) => {
+            console.log(`File ${path} is removed`);
+            this.sendWatcherEvent('unlink', path);
+        })
+            .on('addDir', (path) => {
+            console.log(`Dir ${path} is added`);
+            this.sendWatcherEvent('addDir', path);
+        })
+            .on('unlinkDir', (path) => {
+            console.log(`Dir ${path} is removed`);
+            this.sendWatcherEvent('unlinkDir', path);
+        });
     }
     static getInstance() {
         if (!this.instance) {
@@ -52,6 +71,14 @@ class RoomManager {
             pty: ptyProcess
         });
         this.addListners(userId);
+    }
+    sendWatcherEvent(event, filePath) {
+        this.users.forEach((user) => {
+            user.socket.send(JSON.stringify({
+                type: event,
+                data: filePath
+            }));
+        });
     }
     addListners(userId) {
         var _a;

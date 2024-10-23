@@ -3,6 +3,8 @@ import os from 'os';
 import { WebSocket } from 'ws';
 import { appyPatchtoFile } from './helpers';
 import path from 'path';
+import chokidar, { FSWatcher } from 'chokidar';
+
 
 
 interface User{
@@ -17,8 +19,32 @@ class RoomManager{
 
     private users: Map<string, User> = new Map();
     private static instance: RoomManager;
+    private watcher: FSWatcher;
 
     
+    private constructor(){
+        this.watcher = chokidar.watch(path.join(__dirname , ".." , "user"));
+         // watcher eventListners
+        this.watcher.on('add' , (path)=>{
+        console.log(`File ${path} is added`);
+        this.sendWatcherEvent('add' , path );
+        })
+        .on('unlink',(path)=>{
+        console.log(`File ${path} is removed`);
+        this.sendWatcherEvent('unlink' , path );
+        })
+        .on('addDir',(path)=>{
+        console.log(`Dir ${path} is added`);
+        this.sendWatcherEvent('addDir' , path);
+        })
+        .on('unlinkDir',(path)=>{
+        console.log(`Dir ${path} is removed`);
+        this.sendWatcherEvent('unlinkDir' , path );
+        })
+    }
+
+
+
     static getInstance(){
         if(!this.instance){
             this.instance = new RoomManager();
@@ -53,6 +79,15 @@ class RoomManager{
         })
 
         this.addListners(userId);
+    }
+
+    private sendWatcherEvent(event:string , filePath:string ){
+        this.users.forEach((user)=>{
+            user.socket.send(JSON.stringify({
+                type: event,
+                data:filePath
+            }))
+        })
     }
 
     private addListners(userId:string){

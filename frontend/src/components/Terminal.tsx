@@ -8,7 +8,7 @@ export default function Terminal(){
 
     const terminalRef = useRef<HTMLDivElement>(null);
     const rendered = useRef(false);
-    const socket = useSocket();
+    const socket = useSocket("ws://localhost:8080");
     
     
 
@@ -21,8 +21,8 @@ export default function Terminal(){
         console.log("hi");
 
         const term = new XTerminal({
-            rows:15,
-            
+            rows:25,
+            cols: 120,
         });
 
         term.open(terminalRef.current!);
@@ -53,7 +53,7 @@ export default function Terminal(){
 
     return (
         <div 
-            className="overflow-hidden w-full absolute bottom-0 left-0 right-0" 
+            className="overflow-x-hidden  w-full h-[35%] absolute bottom-0 left-0 right-0 custom-scrollbar  py-1 bg-black word-wrap" 
             ref={terminalRef}
         >
         </div>

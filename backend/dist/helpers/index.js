@@ -94,8 +94,8 @@ function getFileLanguage(filePath) {
 function appyPatchtoFile(filePath, patch) {
     return __awaiter(this, void 0, void 0, function* () {
         const originalFileContent = yield promises_1.default.readFile(filePath);
-        const patchedFileContent = (0, diff_1.applyPatch)(originalFileContent.toString(), patch,{ autoConvertLineEndings: true });
-        console.log("patchedData", patchedFileContent);
+        //@ts-ignore
+        const patchedFileContent = (0, diff_1.applyPatch)(originalFileContent.toString(), patch, { autoConvertLineEndings: true });
         if (patchedFileContent)
             yield promises_1.default.writeFile(filePath, patchedFileContent);
     });
