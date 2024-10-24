@@ -8,6 +8,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+app.use(cors());
+app.use(express.json());
 
 // Initialize ECS and EC2 clients with credentials from environment variables
 const ecsClient = new ECSClient({
@@ -30,8 +32,7 @@ const config = {
     TASK: process.env.TASK_ARN!
 };
 
-app.use(cors());
-app.use(express.json());
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
