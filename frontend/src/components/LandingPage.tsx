@@ -18,13 +18,23 @@ export default function LandingPage(){
             const response = await axios.post('https://cloud-ide-broker.vercel.app/spin-ide');
             console.log(response.data);
             setStatus("Initializing IDE ...");
-            await new Promise(resolve => setTimeout(resolve, 10000));
+            await new Promise(resolve => setTimeout(resolve, 5000));
             try{
-                const ip = await axios.post('https://cloud-ide-broker.vercel.app/get-ip',{
+                const res = await axios.post('https://cloud-ide-broker.vercel.app/get-ip',{
                     taskArn:response.data.taskArn
                 });
-                console.log(ip.data);
-                navigate(`/ide/${ip.data}`);
+                console.log(res.data);
+                const ip = res.data.datreplace(/-/g, '.')
+                const timer = setInterval(async()=>{
+                    try{
+                        await axios.get(`http://${ip}:3000`);
+                        clearInterval(timer);
+                        navigate(`/ide/${res.data}`);
+                    }
+                    catch(error){
+                        console.log(error);
+                    }
+                },2000);
                 setLoading(false);
             }
             catch(error){
