@@ -24,7 +24,7 @@ export default function LandingPage(){
                     taskArn:response.data.taskArn
                 });
                 console.log(res.data);
-                const ip = res.data.datreplace(/-/g, '.')
+                const ip = res.data.replace(/-/g, '.')
                 const timer = setInterval(async()=>{
                     try{
                         await axios.get(`http://${ip}:3000`);
