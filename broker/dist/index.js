@@ -20,9 +20,7 @@ const client_ecs_1 = require("@aws-sdk/client-ecs");
 const client_ec2_1 = require("@aws-sdk/client-ec2");
 // Load environment variables from .env file
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)({
-    origin: 'https://cloud-ide-three.vercel.app/'
-}));
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // Initialize ECS and EC2 clients with credentials from environment variables
 const ecsClient = new client_ecs_1.ECSClient({

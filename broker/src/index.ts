@@ -8,9 +8,7 @@ import { DescribeNetworkInterfacesCommand, EC2Client } from "@aws-sdk/client-ec2
 // Load environment variables from .env file
 
 const app = express();
-app.use(cors({
-    origin: 'https://cloud-ide-three.vercel.app/'
-}));
+app.use(cors());
 app.use(express.json());
 
 // Initialize ECS and EC2 clients with credentials from environment variables
