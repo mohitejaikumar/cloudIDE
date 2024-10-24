@@ -15,6 +15,7 @@ app.use(express.json());
 
 // Initialize ECS and EC2 clients with credentials from environment variables
 const ecsClient = new ECSClient({
+    region: 'ap-south-1',
     credentials: {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!
@@ -22,6 +23,7 @@ const ecsClient = new ECSClient({
 });
 
 const ec2Client = new EC2Client({
+    region: 'ap-south-1',
     credentials: {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!

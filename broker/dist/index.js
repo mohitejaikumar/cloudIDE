@@ -26,12 +26,14 @@ app.use((0, cors_1.default)({
 app.use(express_1.default.json());
 // Initialize ECS and EC2 clients with credentials from environment variables
 const ecsClient = new client_ecs_1.ECSClient({
+    region: 'ap-south-1',
     credentials: {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
         accessKeyId: process.env.AWS_ACCESS_KEY_ID
     }
 });
 const ec2Client = new client_ec2_1.EC2Client({
+    region: 'ap-south-1',
     credentials: {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
         accessKeyId: process.env.AWS_ACCESS_KEY_ID
