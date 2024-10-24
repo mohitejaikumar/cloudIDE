@@ -119,6 +119,13 @@ class RoomManager{
                     
             }
         })
+
+        user.socket?.on('close',()=>{
+            this.users.delete(userId);
+            if(this.users.size === 0){
+                process.exit(0);
+            }
+        })
     }
 }
 

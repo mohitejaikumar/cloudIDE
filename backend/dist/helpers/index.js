@@ -87,6 +87,10 @@ function getFileLanguage(filePath) {
             return 'TypeScript';
         case '.php':
             return 'PHP';
+        case 'c++':
+            return 'CPP';
+        case 'txt':
+            return 'TXT';
         default:
             return 'Unknown Language';
     }
@@ -98,5 +102,8 @@ function appyPatchtoFile(filePath, patch) {
         const patchedFileContent = (0, diff_1.applyPatch)(originalFileContent.toString(), patch, { autoConvertLineEndings: true });
         if (patchedFileContent)
             yield promises_1.default.writeFile(filePath, patchedFileContent);
+        else {
+            console.log("no........................................................");
+        }
     });
 }

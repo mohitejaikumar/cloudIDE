@@ -6,18 +6,23 @@ import { IFileTree } from "../types";
 import Editor from '@monaco-editor/react';
 import {applyPatch, createPatch} from 'diff';
 import useSocket from '../hook/useSocket';
+import { useParams } from 'react-router';
 
 
 export default function CloudIDE() {
 
     const editorRef = useRef(null);
-    const socket = useSocket("ws://localhost:8080");
+    const params = useParams();
+    const ip = params.id?.replace(/-/g, '.');
+    const socket = useSocket(`ws://${ip}:8080`);
     const [selectedFilePath , setSelectedFilePath] = useState<string | null>(null);
     const [selectedFileValue , setSelectedFileValue] = useState("");
     const [selectedFileLanguage , setSelectedFileLanguage] = useState("");
     const [code , setCode] = useState<string | null>(null);
     const [currentOpenDir , setCurrentOpenDir] = useState<string>("");
+    
 
+    console.log(selectedFilePath , selectedFileLanguage , selectedFileValue , code);
     const [fileTree , setFileTree] = useState<IFileTree>({
         'user':{
             name:'user',
@@ -40,8 +45,8 @@ export default function CloudIDE() {
                 children:{}
             }
         };
-        console.log(index , currentDirPath , finalDirPath , newDepthFileTree , newFileTree);
-        console.log(nextDir);
+        
+        
         Object.keys(currentFileTree).forEach(fileTreeItem=>{
             if(fileTreeItem === nextDir){
                 newFileTree[parentDir].children = {...newFileTree[parentDir].children , ...updateFileTree(index+1 , currentDirPath + '/' +nextDir , finalDirPath , newDepthFileTree , currentFileTree[fileTreeItem].children || {})}
@@ -51,34 +56,30 @@ export default function CloudIDE() {
                     [fileTreeItem]:currentFileTree[fileTreeItem]
                 }
             }
-            console.log(newFileTree);
+            
         })
         return newFileTree;
     },[]);
 
     const getFilesIncrementally = useCallback(async(dirPath:string)=>{
         setSelectedFilePath(null);
-        const result = await axios.get('http://localhost:3000/files?dirPath='+dirPath);
+        const result = await axios.get(`http://${ip}:3000/files?dirPath=`+dirPath);
         const newFileTree = updateFileTree(2 , '/user' , dirPath , result.data , fileTree['user'].children || {});
         setFileTree(newFileTree);
-        console.log(fileTree);
-        console.log("Dir ...............................",currentOpenDir);
-        console.log("Tree ....." , result.data , newFileTree);
     },[updateFileTree,currentOpenDir,fileTree]);
     
     useEffect(()=>{
         if(socket==null) return;
         socket.onmessage = (event)=>{
             const payload = JSON.parse(event.data);
-            console.log(payload);
-            console.log("selectedPath" , selectedFilePath);
+            
             switch(payload.type){
                 case 'filePatch':
                 {   
                     if(payload.filePath !== selectedFilePath) break;
                     const originalValue = selectedFileValue;
                     const patch = applyPatch(originalValue,payload.data);
-                    console.log("isSuccess" , patch);
+                    console.log("................patch................................" , patch);
                     if(patch)
                         setSelectedFileValue(patch);
                     break; 
@@ -87,15 +88,15 @@ export default function CloudIDE() {
                 case ('addDir'):
                 {
                     const path:string = payload.data;
-                    const dirs = path.split('\\');
-                    console.log(dirs);
+                    const dirs = path.split('/');
+                    
                     const startIndex = dirs.findIndex(item => item.includes('user'));
                     let finalPath = "";
                     // If 'user' is found, concatenate from that index onwards
                     if (startIndex !== -1) {
                         finalPath =  dirs.slice(startIndex,dirs.length -1).join('/');
                     }
-                    console.log(finalPath);
+                    
                     
                     getFilesIncrementally("/"+finalPath);
                     break;
@@ -104,15 +105,15 @@ export default function CloudIDE() {
                 case 'add':
                 {   
                     const path:string = payload.data;
-                    const dirs = path.split('\\');
-                    console.log(dirs);
+                    const dirs = path.split('/');
+                    
                     const startIndex = dirs.findIndex(item => item.includes('user'));
                     let finalPath = "";
                     // If 'user' is found, concatenate from that index onwards
                     if (startIndex !== -1) {
                         finalPath =  dirs.slice(startIndex,dirs.length -1).join('/');
                     }
-                    console.log(finalPath);
+                    
                     
                     getFilesIncrementally("/"+finalPath);
                     break;
@@ -129,11 +130,14 @@ export default function CloudIDE() {
         const timer = setTimeout(()=>{
             const patch = createPatch(selectedFilePath?.split('/').pop() || "temp.txt" , selectedFileValue , code);
             setSelectedFileValue(code);
+            console.log("..................................................." , patch);
             // console.log(patch);
             if(selectedFilePath === null){
                 clearTimeout(timer);
+                setCode(null);
                 return;
             }
+            console.log("hi......................")
             socket?.send(JSON.stringify({
                 type:'filePatch',
                 data:patch,
@@ -162,8 +166,9 @@ export default function CloudIDE() {
     } 
 
     function handleEditorChange(value:string | undefined,) {
-        console.log('here is the current model value:', value);
+        
         if(!(typeof value === 'string')) return;
+        console.log("changing ..........")
         setCode(value);
     }  
 
@@ -171,8 +176,10 @@ export default function CloudIDE() {
 
     const getFileContent = async(filePath:string)=>{
         setSelectedFilePath(filePath);
-        const result = await axios.get('http://localhost:3000/file/content?filePath='+filePath);
-        console.log(result.data);
+        
+        const result = await axios.get(`http://${ip}:3000/file/content?filePath=`+filePath);
+        
+        setCode(null);
         setSelectedFileValue(result.data.content);
         setSelectedFileLanguage(result.data.language);
         
@@ -207,7 +214,7 @@ export default function CloudIDE() {
                     />
                 </div>
             </div>
-            <Terminal />
+            <Terminal url={`ws://${ip}:8080`} />
         </div>
     )
 }

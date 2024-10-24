@@ -30,7 +30,7 @@ export default function FileTree({
         else{
             setChildOpen(currentOpenDir.startsWith(currentDir));
         }
-        console.log("..................................................." , currentDir , currentOpenDir , currentOpenDir.startsWith(currentDir));
+        
     },[currentOpenDir,currentDir])
 
     return (
@@ -102,9 +102,9 @@ function Subtree({
     const [open , setOpen] = useState(isOpen);
     const [hover , setHover] = useState(false);
     const folderRef = useRef<HTMLDivElement>(null);
-    console.log("hi from subtree " , isOpen);
+    
     const handleOnClick = (dirname:string)=>{
-        console.log(dirname , currentDir);
+        
         
         if(!open){
             getFilesIncrementally(currentDir+'/'+dirname);

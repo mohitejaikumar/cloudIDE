@@ -80,6 +80,10 @@ export function getFileLanguage(filePath:string) {
             return 'TypeScript';
         case '.php':
             return 'PHP';
+        case 'c++':
+            return 'CPP';
+        case 'txt':
+            return 'TXT'
         default:
             return 'Unknown Language';
     }
@@ -92,4 +96,7 @@ export async function appyPatchtoFile(filePath:string, patch:string){
     const patchedFileContent = applyPatch(originalFileContent.toString() , patch ,{ autoConvertLineEndings: true });
     if(patchedFileContent)
         await fs.writeFile(filePath , patchedFileContent);
+    else{
+        console.log("no........................................................")
+    }
 }

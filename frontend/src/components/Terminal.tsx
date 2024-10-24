@@ -4,11 +4,11 @@ import "@xterm/xterm/css/xterm.css";
 import useSocket from "../hook/useSocket";
 
 
-export default function Terminal(){
+export default function Terminal({url}:{url:string}){
 
     const terminalRef = useRef<HTMLDivElement>(null);
     const rendered = useRef(false);
-    const socket = useSocket("ws://localhost:8080");
+    const socket = useSocket(url);
     
     
 

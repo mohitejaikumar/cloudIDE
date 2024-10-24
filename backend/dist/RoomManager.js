@@ -81,7 +81,7 @@ class RoomManager {
         });
     }
     addListners(userId) {
-        var _a;
+        var _a, _b;
         const user = this.users.get(userId);
         (_a = user.socket) === null || _a === void 0 ? void 0 : _a.on('message', (data) => __awaiter(this, void 0, void 0, function* () {
             console.log('received: %s', data);
@@ -106,6 +106,12 @@ class RoomManager {
                 }
             }
         }));
+        (_b = user.socket) === null || _b === void 0 ? void 0 : _b.on('close', () => {
+            this.users.delete(userId);
+            if (this.users.size === 0) {
+                process.exit(0);
+            }
+        });
     }
 }
 exports.default = RoomManager;
