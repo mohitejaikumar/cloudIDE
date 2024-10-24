@@ -20,6 +20,10 @@ const dotenv_1 = __importDefault(require("dotenv"));
 // Load environment variables from .env file
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)({
+    origin: 'https://cloud-ide-three.vercel.app/'
+}));
+app.use(express_1.default.json());
 // Initialize ECS and EC2 clients with credentials from environment variables
 const ecsClient = new client_ecs_1.ECSClient({
     credentials: {
@@ -38,8 +42,6 @@ const config = {
     CLUSTER: process.env.CLUSTER_ARN,
     TASK: process.env.TASK_ARN
 };
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });

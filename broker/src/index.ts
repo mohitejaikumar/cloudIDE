@@ -8,7 +8,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: 'https://cloud-ide-three.vercel.app/'
+}));
 app.use(express.json());
 
 // Initialize ECS and EC2 clients with credentials from environment variables
