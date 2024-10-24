@@ -30,23 +30,24 @@ export default function LandingPage(){
                         await axios.get(`http://${ip}:3000`);
                         clearInterval(timer);
                         navigate(`/ide/${res.data}`);
+                        setLoading(false);
                     }
                     catch(error){
                         console.log(error);
                     }
                 },2000);
-                setLoading(false);
             }
             catch(error){
                 console.log(error);
                 setStatus("Failed to get IP");
+                setLoading(false);
             }
         }
         catch(error){
             console.log(error);
             setStatus("Failed to create IDE");
+            setLoading(false);
         }
-        setLoading(false);
     }
 
 
