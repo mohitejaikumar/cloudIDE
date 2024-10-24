@@ -14,7 +14,7 @@ export default function CloudIDE() {
     const editorRef = useRef(null);
     const params = useParams();
     const ip = params.id?.replace(/-/g, '.');
-    const socket = useSocket(`wss://${ip}:8080`);
+    const socket = useSocket(`ws://${ip}:8080`);
     const [selectedFilePath , setSelectedFilePath] = useState<string | null>(null);
     const [selectedFileValue , setSelectedFileValue] = useState("");
     const [selectedFileLanguage , setSelectedFileLanguage] = useState("");
@@ -214,7 +214,7 @@ export default function CloudIDE() {
                     />
                 </div>
             </div>
-            <Terminal url={`wss://${ip}:8080`} />
+            <Terminal url={`ws://${ip}:8080`} />
         </div>
     )
 }
