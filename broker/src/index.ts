@@ -77,6 +77,8 @@ async function getIPv6Address(networkInterfaceId: string) {
 }
 
 app.post('/spin-ide', async (req, res) => {
+
+    console.log(process.env.config);
     const command = new RunTaskCommand({
         cluster: config.CLUSTER,
         taskDefinition: config.TASK,

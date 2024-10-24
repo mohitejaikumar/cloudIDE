@@ -12,13 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const client_ecs_1 = require("@aws-sdk/client-ecs");
 const client_ec2_1 = require("@aws-sdk/client-ec2");
-const dotenv_1 = __importDefault(require("dotenv"));
 // Load environment variables from .env file
-dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
     origin: 'https://cloud-ide-three.vercel.app/'
@@ -78,6 +78,7 @@ function getIPv6Address(networkInterfaceId) {
     });
 }
 app.post('/spin-ide', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(process.env.config);
     const command = new client_ecs_1.RunTaskCommand({
         cluster: config.CLUSTER,
         taskDefinition: config.TASK,
