@@ -78,7 +78,7 @@ async function getIPv6Address(networkInterfaceId: string) {
 
 app.post('/spin-ide', async (req, res) => {
 
-    console.log(config);
+    
     const command = new RunTaskCommand({
         cluster: config.CLUSTER,
         taskDefinition: config.TASK,
@@ -107,7 +107,7 @@ app.post('/spin-ide', async (req, res) => {
     });
 
     const response = await ecsClient.send(command);
-    console.log(JSON.stringify(response));
+    
     res.send({
         taskArn: response.tasks![0].taskArn
     });

@@ -28,7 +28,7 @@ app.get('/files' , async (req,res)=>{
     }
     const finalDirPath = path.join(__dirname , path.join('..' , dirPath));
     const result = await getFilesIncrementally(finalDirPath,dirPath.split('/').pop() || "user");
-    console.log(result);
+    
     res.send(result);
 })
 

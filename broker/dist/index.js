@@ -78,7 +78,7 @@ function getIPv6Address(networkInterfaceId) {
     });
 }
 app.post('/spin-ide', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(config);
+    
     const command = new client_ecs_1.RunTaskCommand({
         cluster: config.CLUSTER,
         taskDefinition: config.TASK,
@@ -106,7 +106,7 @@ app.post('/spin-ide', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
     });
     const response = yield ecsClient.send(command);
-    console.log(JSON.stringify(response));
+    
     res.send({
         taskArn: response.tasks[0].taskArn
     });

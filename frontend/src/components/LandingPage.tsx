@@ -16,14 +16,13 @@ export default function LandingPage(){
 
             setLoading(true);
             const response = await axios.post('https://cloud-ide-broker.vercel.app/spin-ide');
-            console.log(response.data);
             setStatus("Initializing IDE ...");
             await new Promise(resolve => setTimeout(resolve, 5000));
             try{
                 const res = await axios.post('https://cloud-ide-broker.vercel.app/get-ip',{
                     taskArn:response.data.taskArn
                 });
-                console.log(res.data);
+                
                 const ip = res.data.replace(/-/g, '.')
                 const timer = setInterval(async()=>{
                     try{

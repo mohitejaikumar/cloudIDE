@@ -22,7 +22,7 @@ export default function CloudIDE() {
     const [currentOpenDir , setCurrentOpenDir] = useState<string>("");
     
 
-    console.log(selectedFilePath , selectedFileLanguage , selectedFileValue , code);
+    
     const [fileTree , setFileTree] = useState<IFileTree>({
         'user':{
             name:'user',
@@ -79,7 +79,7 @@ export default function CloudIDE() {
                     if(payload.filePath !== selectedFilePath) break;
                     const originalValue = selectedFileValue;
                     const patch = applyPatch(originalValue,payload.data);
-                    console.log("................patch................................" , patch);
+                    
                     if(patch)
                         setSelectedFileValue(patch);
                     break; 
@@ -130,14 +130,14 @@ export default function CloudIDE() {
         const timer = setTimeout(()=>{
             const patch = createPatch(selectedFilePath?.split('/').pop() || "temp.txt" , selectedFileValue , code);
             setSelectedFileValue(code);
-            console.log("..................................................." , patch);
-            // console.log(patch);
+            
+            
             if(selectedFilePath === null){
                 clearTimeout(timer);
                 setCode(null);
                 return;
             }
-            console.log("hi......................")
+            
             socket?.send(JSON.stringify({
                 type:'filePatch',
                 data:patch,
@@ -168,7 +168,7 @@ export default function CloudIDE() {
     function handleEditorChange(value:string | undefined,) {
         
         if(!(typeof value === 'string')) return;
-        console.log("changing ..........")
+        
         setCode(value);
     }  
 

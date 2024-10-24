@@ -18,7 +18,7 @@ export default function Terminal({url}:{url:string}){
             return;
         }
         rendered.current = true;
-        console.log("hi");
+        
 
         const term = new XTerminal({
             rows:25,
@@ -29,7 +29,7 @@ export default function Terminal({url}:{url:string}){
         
         
         term.onData((data)=>{
-            console.log(data + "enter press to karne de ");
+            
             socket.send(JSON.stringify({
                 type:'terminal',
                 data:data

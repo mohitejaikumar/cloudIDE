@@ -37,7 +37,7 @@ app.get('/files', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     const finalDirPath = path_1.default.join(__dirname, path_1.default.join('..', dirPath));
     const result = yield (0, helpers_1.getFilesIncrementally)(finalDirPath, dirPath.split('/').pop() || "user");
-    console.log(result);
+    
     res.send(result);
 }));
 app.get('/file/content', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
