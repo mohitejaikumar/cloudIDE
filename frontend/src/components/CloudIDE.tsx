@@ -14,7 +14,7 @@ export default function CloudIDE() {
     const editorRef = useRef(null);
     const params = useParams();
     const ip = params.id?.replace(/-/g, '.');
-    const socket = useSocket(`ws://localhost:8080/?path=${ip}:8080`);
+    const socket = useSocket(`wss://cloud-ide-ocdi.vercel.app/?path=${ip}:8080`);
     const [selectedFilePath , setSelectedFilePath] = useState<string | null>(null);
     const [selectedFileValue , setSelectedFileValue] = useState("");
     const [selectedFileLanguage , setSelectedFileLanguage] = useState("");
@@ -63,7 +63,7 @@ export default function CloudIDE() {
 
     const getFilesIncrementally = useCallback(async(dirPath:string)=>{
         setSelectedFilePath(null);
-        const result = await axios.get(`http://localhost:8080`,{
+        const result = await axios.get(`https://cloud-ide-ocdi.vercel.app`,{
             headers:{
                 'path':`${ip}:3000/files?dirPath=${dirPath}`
             }
@@ -181,7 +181,7 @@ export default function CloudIDE() {
     const getFileContent = async(filePath:string)=>{
         setSelectedFilePath(filePath);
         
-        const result = await axios.get(`http://localhost:8080`,{
+        const result = await axios.get(`https://cloud-ide-ocdi.vercel.app`,{
             headers:{
                 'path':`${ip}:3000/file/content?filePath=${filePath}`
             }
@@ -222,7 +222,7 @@ export default function CloudIDE() {
                     />
                 </div>
             </div>
-            <Terminal url={`ws://localhost:8080/?path=${ip}:8080`} />
+            <Terminal url={`wss://cloud-ide-ocdi.vercel.app/?path=${ip}:8080`} />
         </div>
     )
 }
