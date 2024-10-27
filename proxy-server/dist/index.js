@@ -38,7 +38,7 @@ app.use((req, res) => {
 });
 // Handle WebSocket connections for dynamic IPs
 server.on('upgrade', (req, socket, head) => {
-    const parsedUrl = new url_1.URL(req.url, `http://${req.headers.host}`);
+    const parsedUrl = new url_1.URL(req.url, `https://${req.headers.host}`);
     const ip = parsedUrl.searchParams.get('path'); // Extract the `path` parameter
     if (ip) {
         // Construct the WebSocket target URL using the `path` parameter
