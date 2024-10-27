@@ -16,7 +16,7 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 // Create the main server
 const server = http_1.default.createServer(app);
-app.get('/', (req, res) => {
+app.use((req, res) => {
     console.log(`Incoming request URL: ${req.url}`);
     const ip = req.headers['path'];
     if (ip) {

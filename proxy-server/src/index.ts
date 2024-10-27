@@ -17,7 +17,7 @@ const server = http.createServer(app);
 
 
 
-app.get('/', (req, res) => {
+app.use((req, res) => {
   console.log(`Incoming request URL: ${req.url}`);
   
   const ip = req.headers['path'];
