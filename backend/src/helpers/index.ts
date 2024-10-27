@@ -100,3 +100,7 @@ export async function appyPatchtoFile(filePath:string, patch:string){
         console.log("no........................................................")
     }
 }
+
+export function removeTrailingSlash(str:string) {
+  return str.endsWith('/') ? str.slice(0, -1) : str;
+}

@@ -36,16 +36,16 @@ app.get('/files', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return;
     }
     const finalDirPath = path_1.default.join(__dirname, path_1.default.join('..', dirPath));
-    const result = yield (0, helpers_1.getFilesIncrementally)(finalDirPath, dirPath.split('/').pop() || "user");
-    
+    const result = yield (0, helpers_1.getFilesIncrementally)(finalDirPath, dirPath.split('/').filter(Boolean).pop() || "user");
     res.send(result);
 }));
 app.get('/file/content', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const filePath = req.query.filePath;
+    let filePath = req.query.filePath;
     if (typeof filePath !== "string") {
         res.send("Invalid File Path");
         return;
     }
+    filePath = (0, helpers_1.removeTrailingSlash)(filePath);
     const finalFilePath = path_1.default.join(__dirname, path_1.default.join('..', filePath));
     const fileContent = yield promises_1.default.readFile(finalFilePath);
     const language = (0, helpers_1.getFileLanguage)(finalFilePath);

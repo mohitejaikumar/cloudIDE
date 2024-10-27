@@ -78,7 +78,6 @@ function getIPv6Address(networkInterfaceId) {
     });
 }
 app.post('/spin-ide', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    
     const command = new client_ecs_1.RunTaskCommand({
         cluster: config.CLUSTER,
         taskDefinition: config.TASK,
@@ -106,7 +105,6 @@ app.post('/spin-ide', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
     });
     const response = yield ecsClient.send(command);
-    
     res.send({
         taskArn: response.tasks[0].taskArn
     });
@@ -115,7 +113,9 @@ app.post('/get-ip', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const taskArn = req.body.taskArn;
     const enId = yield getTaskDetails(config.CLUSTER, taskArn);
     const ip = yield getIPv6Address(enId || "");
+    console.log("ip", ip);
     const match = ip.match(/ec2-(.*?)\.ap-south-1/);
+    console.log("match", match);
     res.send(match ? match[1] : '');
 }));
 app.listen(8081, () => {

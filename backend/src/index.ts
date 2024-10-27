@@ -5,7 +5,7 @@ import uuid from "uuid";
 import fs from "fs/promises";
 import path from "path";
 import RoomManager from "./RoomManager";
-import { getAllFiles, getFileLanguage, getFilesIncrementally } from "./helpers";
+import { getAllFiles, getFileLanguage, getFilesIncrementally, removeTrailingSlash } from "./helpers";
 
 const app = express();
 app.use(cors());
@@ -27,17 +27,18 @@ app.get('/files' , async (req,res)=>{
         return;
     }
     const finalDirPath = path.join(__dirname , path.join('..' , dirPath));
-    const result = await getFilesIncrementally(finalDirPath,dirPath.split('/').pop() || "user");
+    const result = await getFilesIncrementally(finalDirPath,dirPath.split('/').filter(Boolean).pop() || "user");
     
     res.send(result);
 })
 
 app.get('/file/content' , async(req,res )=>{
-    const filePath = req.query.filePath;
+    let filePath = req.query.filePath;
     if(typeof filePath !== "string"){
         res.send("Invalid File Path");
         return;
     }
+    filePath = removeTrailingSlash(filePath);
     const finalFilePath = path.join(__dirname , path.join('..' , filePath));
     const fileContent = await fs.readFile(finalFilePath);
     const language = getFileLanguage(finalFilePath);

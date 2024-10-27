@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFilesIncrementally = exports.getAllFiles = void 0;
 exports.getFileLanguage = getFileLanguage;
 exports.appyPatchtoFile = appyPatchtoFile;
+exports.removeTrailingSlash = removeTrailingSlash;
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
 const diff_1 = require("diff");
@@ -106,4 +107,7 @@ function appyPatchtoFile(filePath, patch) {
             console.log("no........................................................");
         }
     });
+}
+function removeTrailingSlash(str) {
+    return str.endsWith('/') ? str.slice(0, -1) : str;
 }

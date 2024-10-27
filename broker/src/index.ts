@@ -117,7 +117,9 @@ app.post('/get-ip', async (req, res) => {
     const taskArn = req.body.taskArn;
     const enId = await getTaskDetails(config.CLUSTER, taskArn);
     const ip = await getIPv6Address(enId || "");
+    console.log("ip" , ip);
     const match = ip!.match(/ec2-(.*?)\.ap-south-1/);
+    console.log("match" , match);
     res.send(match ? match[1] : '');
 });
 
