@@ -1,5 +1,6 @@
 import { useEffect, useRef} from "react";
 import {Terminal as XTerminal} from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
 import "@xterm/xterm/css/xterm.css";
 import useSocket from "../hook/useSocket";
 
@@ -9,8 +10,17 @@ export default function Terminal({url}:{url:string}){
     const terminalRef = useRef<HTMLDivElement>(null);
     const rendered = useRef(false);
     const socket = useSocket(url);
+    const fitAddonRef = useRef<FitAddon | null>(null);
     
-    
+
+    function handleResize(){
+        if(fitAddonRef.current === null || fitAddonRef.current === undefined){
+            console.log("fitAddone is null");
+            return;
+        }
+        console.log("resize");
+        fitAddonRef.current.fit();
+    }
 
     useEffect(()=>{
 
@@ -21,12 +31,15 @@ export default function Terminal({url}:{url:string}){
         
 
         const term = new XTerminal({
-            rows:25,
-            cols: 120,
+            scrollSensitivity:0
         });
-
+        const fitAddon = new FitAddon();
+        console.log("fitAddone" , fitAddon);
+        fitAddonRef.current = fitAddon;
+        term.loadAddon(fitAddon);
         term.open(terminalRef.current!);
-        
+        fitAddon.fit();
+
         
         term.onData((data)=>{
             
@@ -48,12 +61,23 @@ export default function Terminal({url}:{url:string}){
             }
             
         }
+        const resizeObserver = new ResizeObserver(handleResize);
+
+        if (terminalRef.current) {
+        resizeObserver.observe(terminalRef.current);
+        }
+
+        return () => {
+            if (terminalRef.current) {
+                resizeObserver.unobserve(terminalRef.current);
+            }
+        };
         
     },[socket])
 
     return (
         <div 
-            className="overflow-x-hidden  w-full h-[35%] absolute bottom-0 left-0 right-0 custom-scrollbar  py-1 bg-black word-wrap" 
+            className="overflow-x-hidden overflow-y-hidden h-full bg-black" 
             ref={terminalRef}
         >
         </div>

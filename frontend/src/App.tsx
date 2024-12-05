@@ -9,10 +9,10 @@ function App() {
   return (
     <>
       <BrowserRouter>
-      <Routes>
-        <Route path="/ide/:id" element={<CloudIDE />} />
-        <Route path="/" element={<LandingPage />} />
-      </Routes>
+        <Routes>
+          <Route path="/ide/:id" element={<CloudIDE />} />
+          <Route path="/" element={<LandingPage />} />
+        </Routes>
       </BrowserRouter>
     </>
   )

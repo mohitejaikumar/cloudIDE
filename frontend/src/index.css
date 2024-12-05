@@ -11,3 +11,11 @@
 .custom-scrollbar::-webkit-scrollbar-thumb{
     color:black;
 }
+.xterm-viewport {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer */
+}
+
+.xterm-viewport::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Edge */
+}

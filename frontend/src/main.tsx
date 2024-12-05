@@ -5,5 +5,7 @@ import './index.css'
 
 
 createRoot(document.getElementById('root')!).render(
-      <App />
+      <div className="overflow-x-hidden">
+            <App />
+      </div>
 )

@@ -7,6 +7,7 @@ import Editor from '@monaco-editor/react';
 import {applyPatch, createPatch} from 'diff';
 import useSocket from '../hook/useSocket';
 import { useParams } from 'react-router';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 
 
 export default function CloudIDE() {
@@ -14,7 +15,7 @@ export default function CloudIDE() {
     const editorRef = useRef(null);
     const params = useParams();
     const ip = params.id?.replace(/-/g, '.');
-    const socket = useSocket(`wss://cloud-ide-ocdi.vercel.app/?path=${ip}:8080`);
+    const socket = useSocket(`${import.meta.env.VITE_WS_URL}/?path=${ip}:8080`);
     const [selectedFilePath , setSelectedFilePath] = useState<string | null>(null);
     const [selectedFileValue , setSelectedFileValue] = useState("");
     const [selectedFileLanguage , setSelectedFileLanguage] = useState("");
@@ -63,7 +64,7 @@ export default function CloudIDE() {
 
     const getFilesIncrementally = useCallback(async(dirPath:string)=>{
         setSelectedFilePath(null);
-        const result = await axios.get(`https://cloud-ide-ocdi.vercel.app`,{
+        const result = await axios.get(`${import.meta.env.VITE_API_URL}`,{
             headers:{
                 'path':`${ip}:3000/files?dirPath=${dirPath}`
             }
@@ -181,7 +182,7 @@ export default function CloudIDE() {
     const getFileContent = async(filePath:string)=>{
         setSelectedFilePath(filePath);
         
-        const result = await axios.get(`https://cloud-ide-ocdi.vercel.app`,{
+        const result = await axios.get(`${import.meta.env.VITE_API_URL}`,{
             headers:{
                 'path':`${ip}:3000/file/content?filePath=${filePath}`
             }
@@ -195,34 +196,83 @@ export default function CloudIDE() {
 
     
     return (
-        <div className="w-screen h-screen overflow-hidden">
-            <div className="h-[65%] w-full flex ">
-                <div className="w-[17%] bg-slate-800 h-full overflow-y-auto custom-scrollbar pb-6">
-                    <FileTree
-                        fileTree={fileTree}
-                        getFilesIncrementally={getFilesIncrementally}
-                        currentDir={''}
-                        isOpen={false}
-                        getFileContent={getFileContent}
-                        currentOpenDir={currentOpenDir}
-                        setCurrentOpenDir={setCurrentOpenDir}
-                    />
-                </div>
-                <div className="h-full w-[83%]">
-                    <Editor
-                        height="100%"
-                        theme="vs-dark"
-                        defaultLanguage={selectedFileLanguage}
-                        defaultValue={selectedFileValue}
-                        language={selectedFileLanguage.toLowerCase()}
-                        value={selectedFileValue}
-                        onMount={handleEditorDidMount}
-                        onValidate={handleEditorValidation}
-                        onChange={handleEditorChange}
-                    />
-                </div>
-            </div>
-            <Terminal url={`wss://cloud-ide-ocdi.vercel.app/?path=${ip}:8080`} />
-        </div>
+        // <div className="w-screen h-screen overflow-hidden">
+        //     <div className="h-[65%] w-full flex ">
+        //         <div className="w-[17%] bg-slate-800 h-full overflow-y-auto custom-scrollbar pb-6">
+        //             <FileTree
+        //                 fileTree={fileTree}
+        //                 getFilesIncrementally={getFilesIncrementally}
+        //                 currentDir={''}
+        //                 isOpen={false}
+        //                 getFileContent={getFileContent}
+        //                 currentOpenDir={currentOpenDir}
+        //                 setCurrentOpenDir={setCurrentOpenDir}
+        //             />
+        //         </div>
+        //         <div className="h-full w-[83%]">
+        //             <Editor
+        //                 height="100%"
+        //                 theme="vs-dark"
+        //                 defaultLanguage={selectedFileLanguage}
+        //                 defaultValue={selectedFileValue}
+        //                 language={selectedFileLanguage.toLowerCase()}
+        //                 value={selectedFileValue}
+        //                 onMount={handleEditorDidMount}
+        //                 onValidate={handleEditorValidation}
+        //                 onChange={handleEditorChange}
+        //             />
+        //         </div>
+        //     </div>
+        //     <Terminal url={`${import.meta.env.VITE_WS_URL}/?path=${ip}:8080`} />
+
+            <ResizablePanelGroup
+                direction='horizontal'
+                className="w-screen h-screen overflow-hidden"
+            >
+                <ResizablePanel defaultSize={20}>
+                    <div className=" bg-black h-screen overflow-y-auto custom-scrollbar pb-6">
+                        <FileTree
+                            fileTree={fileTree}
+                            getFilesIncrementally={getFilesIncrementally}
+                            currentDir={''}
+                            isOpen={false}
+                            getFileContent={getFileContent}
+                            currentOpenDir={currentOpenDir}
+                            setCurrentOpenDir={setCurrentOpenDir}
+                        />
+                    </div>
+                </ResizablePanel>
+                <ResizableHandle />
+                <ResizablePanel defaultSize={80}>
+                    <ResizablePanelGroup
+                        direction='vertical'
+                    >
+                        <ResizablePanel defaultSize={60}>
+                            <div className="h-full"
+                                onResizeCapture={()=>{
+                                    console.log("resize");
+                                }}
+                            >
+                                <Editor
+                                    height="100%"
+                                    theme="vs-dark"
+                                    defaultLanguage={selectedFileLanguage}
+                                    defaultValue={selectedFileValue}
+                                    language={selectedFileLanguage.toLowerCase()}
+                                    value={selectedFileValue}
+                                    onMount={handleEditorDidMount}
+                                    onValidate={handleEditorValidation}
+                                    onChange={handleEditorChange}
+                                />
+                            </div>
+                        </ResizablePanel>
+                        <ResizableHandle />
+                        <ResizablePanel defaultSize={40} onDrag = {(e)=>{console.log(e)}}>
+                                <Terminal url={`${import.meta.env.VITE_WS_URL}/?path=${ip}:8080`} />
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
+                </ResizablePanel>
+            </ResizablePanelGroup>
+        // </div>
     )
 }

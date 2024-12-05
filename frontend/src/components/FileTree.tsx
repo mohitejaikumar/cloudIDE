@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { IFileTree } from "../types"
-
+import { Folder } from 'lucide-react';
+import { File } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 
 export default function FileTree({
@@ -57,11 +60,12 @@ export default function FileTree({
                                 <>
                                     <div 
                                         key={index} 
-                                        className="w-full ml-3 px-2 py-1 my-1 bg-gray-400  cursor-pointer"
+                                        className="w-full ml-3 pl-8 py-1 my-1 text-white hover:bg-[#3d3d3d] flex gap-2  cursor-pointer"
                                         onClick={()=>{getFileContent(currentDir + '/' + fileTreeItem.name)}}
                                     >   
                                         
-                                        {fileTreeItem.name}
+                                            <File size={20}/>
+                                            <div>{fileTreeItem.name}</div>
                                     </div>
                                 </>
                             )}
@@ -100,7 +104,7 @@ function Subtree({
     setCurrentOpenDir:React.Dispatch<React.SetStateAction<string>>
 }){
     const [open , setOpen] = useState(isOpen);
-    const [hover , setHover] = useState(false);
+    const [, setHover] = useState(false);
     const folderRef = useRef<HTMLDivElement>(null);
     
     const handleOnClick = (dirname:string)=>{
@@ -126,17 +130,15 @@ function Subtree({
 
     return (
         <div key={index} className="pl-2 w-full">
-            <div ref={folderRef} className="pl-2 pr-2 py-1 w-full items-center bg-gray-500 m-1 cursor-pointer flex justify-between" onClick={()=>handleOnClick(fileTreeItem.name)}>
-                <div className="flex items-center gap-3">
-                    <div>{(open) ? "v" : ">"}</div> 
+            <div ref={folderRef} className="pl-2 pr-2 py-1 w-full items-center hover:bg-[#3d3d3d] m-1 cursor-pointer flex justify-between" onClick={()=>handleOnClick(fileTreeItem.name)}>
+                <div className="flex items-center gap-3 text-white">
+                    <div className="flex items-center gap-1">
+                        {open ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        <Folder size={20} />
+                    </div>
                     <div>{ fileTreeItem.name}</div>
                 </div>
-                { hover && 
-                    <div className="flex items-center gap-2">
-                        {/* <Folder />
-                        <Files /> */}
-                    </div>
-                }
+                
             </div>
             {open && <FileTree
                 fileTree={children || {}}
