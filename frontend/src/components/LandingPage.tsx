@@ -64,7 +64,7 @@ export default function LandingPage(){
                 <div className="flex items-center justify-center px-6 mt-40">
                     <div className="text-center max-w-3xl">
                         <h1 className="text-3xl lg:text-5xl font-bold text-white">
-                        Streamline Your <span>Codebase</span> with Ease
+                        Collaborate in Code and Share with World
                         </h1>
                         <p className="mt-4 text-sm lg:text-lg text-slate-300">
                         Collaborate, manage, code and stream with our intuitive platform designed <br /> 
