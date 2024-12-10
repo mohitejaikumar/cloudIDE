@@ -24,32 +24,36 @@ app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // Initialize ECS and EC2 clients with credentials from environment variables
 const ecsClient = new client_ecs_1.ECSClient({
-    region: 'ap-south-1',
+    region: "ap-south-1",
     credentials: {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID
-    }
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    },
 });
 const ec2Client = new client_ec2_1.EC2Client({
-    region: 'ap-south-1',
+    region: "ap-south-1",
     credentials: {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID
-    }
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    },
 });
 // Configuration using environment variables
 const config = {
     CLUSTER: process.env.CLUSTER_ARN,
-    TASK: process.env.TASK_ARN
+    TASK: process.env.TASK_ARN,
 };
-app.get('/', (req, res) => {
-    res.send('Hello World!');
+const rtmpConfig = {
+    CLUSTER: process.env.CLUSTER_ARN,
+    TASK: process.env.RTMP_TASK_ARN,
+};
+app.get("/", (req, res) => {
+    res.send("Hello World!");
 });
 function getTaskDetails(clusterName, taskArn) {
     return __awaiter(this, void 0, void 0, function* () {
         const params = {
             cluster: clusterName,
-            tasks: [taskArn]
+            tasks: [taskArn],
         };
         const command = new client_ecs_1.DescribeTasksCommand(params);
         const response = yield ecsClient.send(command);
@@ -59,8 +63,9 @@ function getTaskDetails(clusterName, taskArn) {
         const attachments = response.tasks[0].attachments;
         // Find the network interface attached to the task
         //@ts-ignore
-        const networkInterfaceId = attachments.find(attachment => attachment.type === "ElasticNetworkInterface")
-            .details.find(detail => detail.name === "networkInterfaceId").value;
+        const networkInterfaceId = attachments
+            .find((attachment) => attachment.type === "ElasticNetworkInterface")
+            .details.find((detail) => detail.name === "networkInterfaceId").value;
         return networkInterfaceId;
     });
 }
@@ -77,47 +82,84 @@ function getIPv6Address(networkInterfaceId) {
         return ipv6Addresses;
     });
 }
-app.post('/spin-ide', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/spin-ide", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const command = new client_ecs_1.RunTaskCommand({
         cluster: config.CLUSTER,
         taskDefinition: config.TASK,
-        launchType: 'FARGATE',
+        launchType: "FARGATE",
         count: 1,
         networkConfiguration: {
             awsvpcConfiguration: {
-                assignPublicIp: 'ENABLED',
+                assignPublicIp: "ENABLED",
                 subnets: [
                     process.env.SUBNET_1,
                     process.env.SUBNET_2,
-                    process.env.SUBNET_3
+                    process.env.SUBNET_3,
                 ],
-                securityGroups: [
-                    process.env.SECURITY_GROUP
-                ]
-            }
+                securityGroups: [process.env.SECURITY_GROUP],
+            },
         },
         overrides: {
             containerOverrides: [
                 {
-                    name: 'wscloudide',
-                }
-            ]
-        }
+                    name: "wscloudide",
+                },
+            ],
+        },
     });
     const response = yield ecsClient.send(command);
     res.send({
-        taskArn: response.tasks[0].taskArn
+        taskArn: response.tasks[0].taskArn,
     });
 }));
-app.post('/get-ip', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/spin-rtmp", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const command = new client_ecs_1.RunTaskCommand({
+        cluster: rtmpConfig.CLUSTER,
+        taskDefinition: rtmpConfig.TASK,
+        launchType: "FARGATE",
+        count: 1,
+        networkConfiguration: {
+            awsvpcConfiguration: {
+                assignPublicIp: "ENABLED",
+                subnets: [
+                    process.env.SUBNET_1,
+                    process.env.SUBNET_2,
+                    process.env.SUBNET_3,
+                ],
+                securityGroups: [process.env.RTMP_SECURITY_GROUP],
+            },
+        },
+        overrides: {
+            containerOverrides: [
+                {
+                    name: "rtmp-server",
+                },
+            ],
+        },
+    });
+    const response = yield ecsClient.send(command);
+    res.send({
+        taskArn: response.tasks[0].taskArn,
+    });
+}));
+app.post("/get-ip", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const taskArn = req.body.taskArn;
     const enId = yield getTaskDetails(config.CLUSTER, taskArn);
     const ip = yield getIPv6Address(enId || "");
     console.log("ip", ip);
     const match = ip.match(/ec2-(.*?)\.ap-south-1/);
     console.log("match", match);
-    res.send(match ? match[1] : '');
+    res.send(match ? match[1] : "");
+}));
+app.post("/get-rtmp-ip", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const taskArn = req.body.taskArn;
+    const enId = yield getTaskDetails(rtmpConfig.CLUSTER, taskArn);
+    const ip = yield getIPv6Address(enId || "");
+    console.log("ip", ip);
+    const match = ip.match(/ec2-(.*?)\.ap-south-1/);
+    console.log("match", match);
+    res.send(match ? match[1] : "");
 }));
 app.listen(8081, () => {
-    console.log('Listening on port 8081');
+    console.log("Listening on port 8081");
 });

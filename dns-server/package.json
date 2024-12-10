@@ -1,0 +1,19 @@
+{
+  "name": "dns-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dgram": "^1.0.1",
+    "dns-packet": "^5.6.1",
+    "nodemon": "^3.1.7",
+    "tsc": "^2.0.4",
+    "typescript": "^5.7.2"
+  }
+}

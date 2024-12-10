@@ -29,6 +29,8 @@ export default function CloudIDE() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const videoDivRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [rtmpIp, setRtmpIp] = useState("");
 
   const [fileTree, setFileTree] = useState<IFileTree>({
     user: {
@@ -185,7 +187,9 @@ export default function CloudIDE() {
 
   useEffect(() => {
     if (initStreaming) {
-      const rtmpSocket = new WebSocket(`${import.meta.env.VITE_RTMP_URL}`);
+      const rtmpSocket = new WebSocket(
+        `${import.meta.env.VITE_WS_URL}/?path=${rtmpIp}:8082`
+      );
       rtmpSocket.onopen = async () => {
         console.log("connected");
         const tempMedia = await navigator.mediaDevices.getDisplayMedia({
@@ -209,8 +213,9 @@ export default function CloudIDE() {
         };
         mediaRecorder.start(100);
       };
+      window.open("/stream", "_blank");
     }
-  }, [initStreaming]);
+  }, [initStreaming, rtmpIp]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleEditorDidMount(editor: any) {
@@ -246,7 +251,46 @@ export default function CloudIDE() {
   };
 
   async function handleStreaming() {
-    setInitStreaming((prev) => !prev);
+    // logic to create rtmp-server
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BROKER_URL}/spin-rtmp`
+      );
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_BROKER_URL}/get-rtmp-ip`,
+          {
+            taskArn: response.data.taskArn,
+          }
+        );
+
+        const ip = res.data.replace(/-/g, ".");
+        setRtmpIp(ip);
+        localStorage.setItem("rtmpIp", ip);
+        const timer = setInterval(async () => {
+          try {
+            await axios.get(`${import.meta.env.VITE_API_URL}`, {
+              headers: {
+                path: `${ip}:8081`,
+              },
+            });
+            clearInterval(timer);
+            setLoading(false);
+            setInitStreaming((prev) => !prev);
+          } catch (error) {
+            console.log(error);
+          }
+        }, 2000);
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
   }
 
   async function handleMyMirror() {
@@ -298,8 +342,12 @@ export default function CloudIDE() {
             <Button variant="contained" onClick={handleMyMirror}>
               Camera
             </Button>
-            <Button variant="contained" onClick={handleStreaming}>
-              Self Stream
+            <Button
+              variant="contained"
+              onClick={handleStreaming}
+              disabled={loading}>
+              Stream {initStreaming && !loading ? "Stop" : "Start"}{" "}
+              {loading ? "..." : ""}
             </Button>
           </div>
         </div>

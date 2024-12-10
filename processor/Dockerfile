@@ -4,6 +4,7 @@ FROM tiangolo/nginx-rtmp
 # Install dependencies: curl, Node.js, ffmpeg
 RUN apt-get update && \
     apt-get install -y curl && \
+    apt-get install -y lsof && \
     curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get update && \
     apt-get upgrade -y && \
@@ -28,6 +29,7 @@ RUN npm install -g nodemon
 COPY . .
 
 # Expose necessary ports
+EXPOSE 8081
 EXPOSE 8082
 EXPOSE 8083
 EXPOSE 1935

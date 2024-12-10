@@ -5,7 +5,6 @@ import Button from "./Button";
 import { BackgroundGradient } from "./ui/background-gradient";
 import DemoImg from "../assets/images/demo.png";
 import Navbar from "./Navbar";
-import useRTMP from "../hook/useRTMP";
 
 export default function LandingPage() {
   const [loading, setLoading] = useState(false);
@@ -80,8 +79,11 @@ export default function LandingPage() {
                 }}>
                 Get Started
               </Button>
-              <Button variant="outlined" onClick={handleCreateIDE}>
-                Create IDE +
+              <Button
+                variant="outlined"
+                onClick={handleCreateIDE}
+                disabled={loading}>
+                {loading ? status : "Create IDE +"}
               </Button>
             </div>
           </div>
@@ -94,13 +96,4 @@ export default function LandingPage() {
       </div>
     </>
   );
-}
-
-//   // <div className="w-scree h-screen flex flex-col justify-center items-center">
-//     </div>
-{
-  /* <button className="px-2 py-1 rounded-lg bg-blue-500 text-white" onClick={handleCreateIDE} disabled={loading}>
-                Create IDE +
-            </button>
-            {loading &&<div>{status}</div>} */
 }
