@@ -1,11 +1,13 @@
 import { useEffect, useRef } from "react";
 import Hls from "hls.js";
+import { useParams } from "react-router";
 
-const HlsPlayer = () => {
+const LiveStream = () => {
   const videoRef = useRef(null);
+  const param = useParams();
 
   useEffect(() => {
-    const ip = localStorage.getItem("rtmpIp");
+    const ip = param.id?.replace(/-/g, ".");
     if (Hls.isSupported() && videoRef.current) {
       const hls = new Hls({
         xhrSetup: (xhr) => {
@@ -24,4 +26,4 @@ const HlsPlayer = () => {
   );
 };
 
-export default HlsPlayer;
+export default LiveStream;

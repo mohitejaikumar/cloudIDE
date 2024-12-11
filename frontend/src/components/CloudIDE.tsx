@@ -213,7 +213,7 @@ export default function CloudIDE() {
         };
         mediaRecorder.start(100);
       };
-      window.open("/stream", "_blank");
+      window.open(`/stream/${rtmpIp.replace(/./g, "-")}`, "_blank");
     }
   }, [initStreaming, rtmpIp]);
 
