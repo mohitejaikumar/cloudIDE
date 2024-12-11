@@ -1,6 +1,7 @@
 {
-    "routes": [
-        { "src": "/", "dest": "/" },
-        {"src":"/ide/(.*)","dest":"/"}
-    ]
+  "routes": [
+    { "src": "/", "dest": "/" },
+    { "src": "/ide/(.*)", "dest": "/" },
+    { "src": "/stream", "dest": "/" }
+  ]
 }
