@@ -1,25 +1,27 @@
-import { useEffect, useState } from "react";
-import ReactPlayer from "react-player";
+import { useEffect, useRef } from "react";
+import Hls from "hls.js";
 
-export default function LiveStream() {
-  const [rtmpIp, setRtmpIp] = useState("");
+const HlsPlayer = () => {
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const ip = localStorage.getItem("rtmpIp");
-    if (ip) {
-      setRtmpIp(ip);
+    if (Hls.isSupported() && videoRef.current) {
+      const hls = new Hls({
+        xhrSetup: (xhr) => {
+          xhr.setRequestHeader("ip", ip || "13.233.16.66"); // Add custom headers
+        },
+      });
+      hls.loadSource(`${import.meta.env.VITE_HLS_PROXY}/hls/.m3u8`);
+      hls.attachMedia(videoRef.current);
     }
   }, []);
 
   return (
-    <div className="min-h-screen w-screen flex flex-col items-center bg-zinc-900 py-10">
-      <ReactPlayer
-        url={`http://${rtmpIp}:8083/hls/.m3u8`}
-        controls={true}
-        height="70%"
-        width="70%"
-      />
-      <div className="mt-5"></div>
+    <div className="h-screen w-screen flex justify-center items-center bg-black">
+      <video ref={videoRef} controls width="70%" height="70%" />
     </div>
   );
-}
+};
+
+export default HlsPlayer;
