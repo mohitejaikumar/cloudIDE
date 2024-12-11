@@ -68,7 +68,7 @@ server.on("upgrade", (req, socket, head) => {
 });
 
 // Start the server on a specified port
-const PORT = 8080;
+const PORT = 8081;
 server.listen(PORT, () => {
   console.log(
     `Central reverse proxy server running on http://localhost:${PORT}`
