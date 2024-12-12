@@ -21,7 +21,7 @@ export default function Terminal() {
 
   useEffect(() => {
     console.log("first render");
-    if (rendered.current === true || socket === null) {
+    if (socket === null) {
       return;
     }
     rendered.current = true;
