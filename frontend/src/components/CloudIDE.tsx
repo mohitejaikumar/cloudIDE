@@ -226,6 +226,16 @@ export default function CloudIDE() {
     );
   }, []);
 
+  useEffect(() => {
+    if (socket) {
+      setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: "ping" }));
+        }
+      }, 10000);
+    }
+  }, [socket]);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleEditorDidMount(editor: any) {
     editorRef.current = editor;
