@@ -22,7 +22,6 @@ export default function LandingPage() {
         `${import.meta.env.VITE_BROKER_URL}/spin-ide`
       );
       setStatus("Initializing IDE ...");
-      await new Promise((resolve) => setTimeout(resolve, 10000));
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_BROKER_URL}/get-ip`,
@@ -41,10 +40,12 @@ export default function LandingPage() {
               },
             });
             setWsURL(
-              `${
-                import.meta.env.VITE_WS_URL
-              }/?path=${ip}:8080&clientId=${clientId}`
+              () =>
+                `${
+                  import.meta.env.VITE_WS_URL
+                }/?path=${ip}:8080&clientId=${clientId}`
             );
+            await new Promise((resolve) => setTimeout(resolve, 10000));
             clearInterval(timer);
             navigate(`/ide/${res.data}`);
             setLoading(false);
