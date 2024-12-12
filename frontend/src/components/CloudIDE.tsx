@@ -18,7 +18,10 @@ export default function CloudIDE() {
   const editorRef = useRef(null);
   const params = useParams();
   const ip = params.id?.replace(/-/g, ".");
-  const socket = useSocket(`${import.meta.env.VITE_WS_URL}/?path=${ip}:8080`);
+  const clientId = Math.floor(Math.random() * 100000);
+  const socket = useSocket(
+    `${import.meta.env.VITE_WS_URL}/?path=${ip}:8080&clientId=${clientId}`
+  );
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [selectedFileValue, setSelectedFileValue] = useState("");
   const [selectedFileLanguage, setSelectedFileLanguage] = useState("");
@@ -397,7 +400,9 @@ export default function CloudIDE() {
                   console.log(e);
                 }}>
                 <Terminal
-                  url={`${import.meta.env.VITE_WS_URL}/?path=${ip}:8080`}
+                  url={`${
+                    import.meta.env.VITE_WS_URL
+                  }/?path=${ip}:8080&clientId=${clientId}`}
                 />
               </ResizablePanel>
             </ResizablePanelGroup>

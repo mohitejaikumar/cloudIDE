@@ -3,6 +3,7 @@ import http from "http";
 import express from "express";
 import cors from "cors";
 import { URL } from "url";
+import WebSocket from "ws";
 
 // Create a proxy server instance with WebSocket support enabled
 const proxy = httpProxy.createProxyServer({
@@ -22,6 +23,8 @@ app.use(cors());
 
 // Create the main server
 const server = http.createServer(app);
+
+const availableWebsockets = new Map<string, WebSocket>();
 
 app.use((req, res) => {
   console.log(`Incoming request URL: ${req.url}`);
@@ -53,20 +56,37 @@ app.use((req, res) => {
 server.on("upgrade", (req, socket, head) => {
   const parsedUrl = new URL(req.url!, `https://${req.headers.host}`);
   const ip = parsedUrl.searchParams.get("path"); // Extract the `path` parameter
+  const clientId = parsedUrl.searchParams.get("clientId") || "";
 
   if (ip) {
     // Construct the WebSocket target URL using the `path` parameter
     const target = `ws://${ip}`;
     console.log(`Proxying WebSocket connection to: ${target}`);
-
+    
     // Forward the WebSocket request to the target
-    proxy.ws(req, socket, head, { target }, (error) => {
-      console.error(
-        "Error while proxying WebSocket connection:",
-        error.message || error
-      );
-      socket.end("An error occurred with the WebSocket proxy.");
-    });
+
+    if(availableWebsockets.has(clientId)){
+        const wSocket = availableWebsockets.get(clientId)!;
+        proxy.ws(req, wSocket, head, { target }, (error) => {
+          console.error(
+            "Error while proxying WebSocket connection:",
+            error.message || error
+          );
+          socket.end("An error occurred with the WebSocket proxy.");
+        });
+    }
+    else{
+        const wSocket = new WebSocket(target);
+        availableWebsockets.set(clientId, wSocket);
+        proxy.ws(req, wSocket, head, { target }, (error) => {
+          console.error(
+            "Error while proxying WebSocket connection:",
+            error.message || error
+          );
+          socket.end("An error occurred with the WebSocket proxy.");
+        });
+    }
+    
   } else {
     // If the `path` parameter is missing, close the WebSocket connection
     console.log('Missing "path" query parameter for WebSocket connection');

@@ -18,9 +18,11 @@
     "http": "^0.0.1-security",
     "http-proxy": "^1.18.1",
     "tsc": "^2.0.4",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@types/http-proxy": "^1.17.15"
+    "@types/http-proxy": "^1.17.15",
+    "@types/ws": "^8.5.13"
   }
 }
