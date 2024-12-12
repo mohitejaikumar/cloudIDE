@@ -3,17 +3,12 @@ import http from "http";
 import express from "express";
 import cors from "cors";
 import { URL } from "url";
-import WebSocket from "ws";
 
 // Create a proxy server instance with WebSocket support enabled
 const proxy = httpProxy.createProxyServer({
   ws: true,
-});
-
-proxy.on("proxyReqWs", (proxyReq) => {
-  // Add custom headers to the WebSocket request
-  proxyReq.setHeader("Upgrade", "websocket");
-  proxyReq.setHeader("Connection", "upgrade");
+  proxyTimeout: 0,
+  timeout: 0,
 });
 
 const app = express();
@@ -21,8 +16,6 @@ app.use(cors());
 
 // Create the main server
 const server = http.createServer(app);
-
-const availableWebsockets = new Map<string, WebSocket>();
 
 app.use((req, res) => {
   console.log(`Incoming request URL: ${req.url}`);
@@ -35,7 +28,7 @@ app.use((req, res) => {
     console.log(`Proxying HTTP request to: ${target}`);
 
     // Forward the HTTP request to the target
-    proxy.web(req, res, { target }, (error) => {
+    proxy.web(req, res, { target, changeOrigin: true, ws: true }, (error) => {
       console.error(
         "Error while proxying HTTP request:",
         error.message || error
@@ -48,13 +41,6 @@ app.use((req, res) => {
     res.writeHead(400, { "Content-Type": "text/plain" });
     res.end('Missing "path" query parameter. Use ?path={ip}');
   }
-});
-
-proxy.on("proxyReqWs", (proxyReq, req, socket, options, head) => {
-  if (socket.setTimeout) {
-    socket.setTimeout(0); // Only call setTimeout if it's available
-  }
-  // Your custom WebSocket handling logic here
 });
 
 // Handle WebSocket connections for dynamic IPs
@@ -70,29 +56,19 @@ server.on("upgrade", (req, socket, head) => {
 
     // Forward the WebSocket request to the target
 
-    if (availableWebsockets.has(clientId)) {
-      const wSocket = availableWebsockets.get(clientId)!;
-      proxy.ws(req, wSocket, head, { target }, (error) => {
+    proxy.ws(
+      req,
+      socket,
+      head,
+      { target, timeout: 0, proxyTimeout: 0, changeOrigin: true },
+      (error) => {
         console.error(
           "Error while proxying WebSocket connection:",
           error.message || error
         );
         socket.end("An error occurred with the WebSocket proxy.");
-      });
-    } else {
-      const wSocket = new WebSocket(target);
-
-      wSocket.onopen = () => {
-        availableWebsockets.set(clientId, wSocket);
-        proxy.ws(req, wSocket, head, { target }, (error) => {
-          console.error(
-            "Error while proxying WebSocket connection:",
-            error.message || error
-          );
-          socket.end("An error occurred with the WebSocket proxy.");
-        });
-      };
-    }
+      }
+    );
   } else {
     // If the `path` parameter is missing, close the WebSocket connection
     console.log('Missing "path" query parameter for WebSocket connection');
@@ -122,4 +98,12 @@ proxy.on("error", (err, req, res) => {
     res.end();
     res.destroy();
   }
+});
+
+proxy.on("proxyReqWs", (proxyReq, req, res) => {
+  console.log(req.socket.remoteAddress);
+});
+
+proxy.on("proxyRes", (proxyRes, req, res) => {
+  console.log(req.socket.remoteAddress);
 });
