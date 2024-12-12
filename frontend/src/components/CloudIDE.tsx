@@ -5,7 +5,6 @@ import Terminal from "./Terminal";
 import { IFileTree } from "../types";
 import Editor from "@monaco-editor/react";
 import { applyPatch, createPatch } from "diff";
-import useSocket from "../hook/useSocket";
 import { useParams } from "react-router";
 import {
   ResizableHandle,
@@ -13,15 +12,13 @@ import {
   ResizablePanelGroup,
 } from "./ui/resizable";
 import Button from "./Button";
+import useClient from "../hook/useClient";
 
 export default function CloudIDE() {
   const editorRef = useRef(null);
   const params = useParams();
   const ip = params.id?.replace(/-/g, ".");
-  const clientId = Math.floor(Math.random() * 100000);
-  const socket = useSocket(
-    `${import.meta.env.VITE_WS_URL}/?path=${ip}:8080&clientId=${clientId}`
-  );
+  const { clientId, socket, setWsURL } = useClient();
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [selectedFileValue, setSelectedFileValue] = useState("");
   const [selectedFileLanguage, setSelectedFileLanguage] = useState("");
@@ -94,6 +91,7 @@ export default function CloudIDE() {
       const result = await axios.get(`${import.meta.env.VITE_API_URL}`, {
         headers: {
           path: `${ip}:3000/files?dirPath=${dirPath}`,
+          "client-id": clientId,
         },
       });
       const newFileTree = updateFileTree(
@@ -105,7 +103,7 @@ export default function CloudIDE() {
       );
       setFileTree(newFileTree);
     },
-    [ip, updateFileTree, fileTree]
+    [ip, updateFileTree, fileTree, clientId]
   );
 
   useEffect(() => {
@@ -221,6 +219,12 @@ export default function CloudIDE() {
     }
   }, [initStreaming, rtmpIp]);
 
+  useEffect(() => {
+    setWsURL(
+      `${import.meta.env.VITE_WS_URL}/?path=${ip}:8080&clientId=${clientId}`
+    );
+  }, []);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleEditorDidMount(editor: any) {
     editorRef.current = editor;
@@ -246,6 +250,7 @@ export default function CloudIDE() {
     const result = await axios.get(`${import.meta.env.VITE_API_URL}`, {
       headers: {
         path: `${ip}:3000/file/content?filePath=${filePath}`,
+        "client-id": clientId,
       },
     });
 
@@ -399,11 +404,7 @@ export default function CloudIDE() {
                 onDrag={(e) => {
                   console.log(e);
                 }}>
-                <Terminal
-                  url={`${
-                    import.meta.env.VITE_WS_URL
-                  }/?path=${ip}:8080&clientId=${clientId}`}
-                />
+                <Terminal />
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>

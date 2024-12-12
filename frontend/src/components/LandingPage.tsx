@@ -5,10 +5,12 @@ import Button from "./Button";
 import { BackgroundGradient } from "./ui/background-gradient";
 import DemoImg from "../assets/images/demo.png";
 import Navbar from "./Navbar";
+import useClient from "../hook/useClient";
 
 export default function LandingPage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("Creating IDE Instance");
+  const { clientId } = useClient();
 
   const navigate = useNavigate();
 
@@ -35,6 +37,7 @@ export default function LandingPage() {
             await axios.get(`${import.meta.env.VITE_API_URL}`, {
               headers: {
                 path: `${ip}:3000`,
+                "client-id": clientId,
               },
             });
             clearInterval(timer);

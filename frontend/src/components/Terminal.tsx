@@ -2,14 +2,14 @@ import { useEffect, useRef} from "react";
 import {Terminal as XTerminal} from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import "@xterm/xterm/css/xterm.css";
-import useSocket from "../hook/useSocket";
+import useClient from "../hook/useClient";
 
 
-export default function Terminal({url}:{url:string}){
+export default function Terminal(){
 
     const terminalRef = useRef<HTMLDivElement>(null);
     const rendered = useRef(false);
-    const socket = useSocket(url);
+    const {socket} = useClient();
     const fitAddonRef = useRef<FitAddon | null>(null);
     
 
