@@ -7,7 +7,7 @@ import useClient from "../hook/useClient";
 export default function Terminal() {
   const terminalRef = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
-  const { socket } = useClient();
+  const { clientId, socket } = useClient();
   const fitAddonRef = useRef<FitAddon | null>(null);
 
   function handleResize() {
@@ -41,6 +41,7 @@ export default function Terminal() {
         JSON.stringify({
           type: "terminal",
           data: data,
+          clientId: clientId,
         })
       );
     });
@@ -67,7 +68,7 @@ export default function Terminal() {
         resizeObserver.unobserve(terminalRef.current);
       }
     };
-  }, [socket]);
+  }, [socket, clientId]);
 
   if (socket === null) return <div>Loading ...</div>;
 

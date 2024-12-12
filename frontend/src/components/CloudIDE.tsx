@@ -177,6 +177,7 @@ export default function CloudIDE() {
           type: "filePatch",
           data: patch,
           filePath: selectedFilePath,
+          clientId: clientId,
         })
       );
     }, 1000);

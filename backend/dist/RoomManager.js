@@ -125,19 +125,22 @@ class RoomManager {
           __awaiter(this, void 0, void 0, function* () {
             console.log("received: %s", data);
             const payload = JSON.parse(data);
-            console.log("users");
-            this.users.forEach((u) => {
-              console.log(u.id);
-            });
             switch (payload.type) {
               case "terminal": {
-                user.pty.write(payload.data);
-                console.log(user.pty.pid);
+                const currentUser = this.users.get(payload.clientId);
+                currentUser === null || currentUser === void 0
+                  ? void 0
+                  : currentUser.pty.write(payload.data);
+                console.log(
+                  currentUser === null || currentUser === void 0
+                    ? void 0
+                    : currentUser.pty.pid
+                );
                 break;
               }
               case "filePatch": {
                 this.users.forEach((u) => {
-                  if (u.id !== userId) {
+                  if (u.id !== payload.clientId) {
                     u.socket.send(
                       JSON.stringify({
                         type: "filePatch",
