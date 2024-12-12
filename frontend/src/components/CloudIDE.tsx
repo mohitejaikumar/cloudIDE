@@ -18,7 +18,7 @@ export default function CloudIDE() {
   const editorRef = useRef(null);
   const params = useParams();
   const ip = params.id?.replace(/-/g, ".");
-  const { clientId, socket, setWsURL } = useClient();
+  const { clientId, socket } = useClient();
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [selectedFileValue, setSelectedFileValue] = useState("");
   const [selectedFileLanguage, setSelectedFileLanguage] = useState("");
@@ -219,11 +219,7 @@ export default function CloudIDE() {
     }
   }, [initStreaming, rtmpIp]);
 
-  useEffect(() => {
-    setWsURL(
-      `${import.meta.env.VITE_WS_URL}/?path=${ip}:8080&clientId=${clientId}`
-    );
-  }, []);
+  useEffect(() => {}, []);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleEditorDidMount(editor: any) {
