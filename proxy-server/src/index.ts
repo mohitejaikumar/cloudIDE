@@ -50,6 +50,13 @@ app.use((req, res) => {
   }
 });
 
+proxy.on("proxyReqWs", (proxyReq, req, socket, options, head) => {
+  if (socket.setTimeout) {
+    socket.setTimeout(0); // Only call setTimeout if it's available
+  }
+  // Your custom WebSocket handling logic here
+});
+
 // Handle WebSocket connections for dynamic IPs
 server.on("upgrade", (req, socket, head) => {
   const parsedUrl = new URL(req.url!, `https://${req.headers.host}`);
