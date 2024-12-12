@@ -360,7 +360,8 @@ export default function CloudIDE() {
     <>
       <div
         className="flex flex-col h-screen overflow-y-hidden relative"
-        onMouseMove={onMouseMove}>
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}>
         <div className="w-full h-fit flex justify-between items-center px-10 py-2 bg-black border-b-2 border-b-zinc-600">
           <div className="text-white font-bold text-xl">codeStream</div>
           <div className="flex gap-2">
@@ -427,7 +428,7 @@ export default function CloudIDE() {
         </ResizablePanelGroup>
         <div
           ref={videoDivRef}
-          className={`absolute bottom-10 right-10 ${
+          className={`fixed bottom-10 right-10 ${
             myMirror ? "block" : "hidden"
           }`}
           onMouseDown={onMouseDown}
