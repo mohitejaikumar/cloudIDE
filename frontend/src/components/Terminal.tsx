@@ -68,7 +68,7 @@ export default function Terminal() {
         resizeObserver.unobserve(terminalRef.current);
       }
     };
-  }, []);
+  }, [socket]);
 
   return (
     <div
