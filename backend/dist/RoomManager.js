@@ -145,6 +145,8 @@ class RoomManager {
                         filePath: payload.filePath,
                       })
                     );
+                  } else {
+                    console.log("not communicated with ", u.id);
                   }
                 });
                 yield (0,
@@ -153,6 +155,9 @@ class RoomManager {
             }
           })
         );
+    user.socket.on("close", () => {
+      this.users.delete(user.id);
+    });
   }
 }
 exports.default = RoomManager;

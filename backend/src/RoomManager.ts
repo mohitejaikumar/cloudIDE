@@ -117,6 +117,8 @@ class RoomManager {
                   filePath: payload.filePath,
                 })
               );
+            } else {
+              console.log("not communicated with ", u.id);
             }
           });
           await appyPatchtoFile(
@@ -125,6 +127,10 @@ class RoomManager {
           );
         }
       }
+    });
+
+    user.socket.on("close", () => {
+      this.users.delete(user.id);
     });
   }
 }

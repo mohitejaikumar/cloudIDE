@@ -70,6 +70,8 @@ export default function Terminal() {
     };
   }, [socket]);
 
+  if (socket === null) return <div>Loading ...</div>;
+
   return (
     <div
       className="overflow-x-hidden overflow-y-hidden h-full bg-black"
