@@ -10,8 +10,6 @@ export default function Terminal() {
   const { socket } = useClient();
   const fitAddonRef = useRef<FitAddon | null>(null);
 
-  console.log(socket);
-
   function handleResize() {
     if (fitAddonRef.current === null || fitAddonRef.current === undefined) {
       console.log("fitAddone is null");
@@ -22,6 +20,7 @@ export default function Terminal() {
   }
 
   useEffect(() => {
+    console.log("first render");
     if (rendered.current === true || socket === null) {
       return;
     }

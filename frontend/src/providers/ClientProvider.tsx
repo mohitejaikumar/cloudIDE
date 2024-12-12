@@ -17,12 +17,17 @@ export default function ClientProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const socket = new WebSocket(wsURL);
-    setSocket(socket);
     console.log("chenged socket url");
     socket.onopen = () => {
-      console.log("connected");
+      setSocket(socket);
+      socket.send(
+        JSON.stringify({
+            type: "join",
+            clientId: clientId,
+        })
+      );
     };
-  }, [wsURL]);
+  }, [wsURL, clientId]);
 
   return (
     <ClientContext.Provider

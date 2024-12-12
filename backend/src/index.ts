@@ -1,13 +1,11 @@
 import express from "express";
 import cors from "cors";
 import { WebSocketServer } from "ws";
-import uuid from "uuid";
 import fs from "fs/promises";
 import path from "path";
 import RoomManager from "./RoomManager";
 import http from "http";
 import {
-  getAllFiles,
   getFileLanguage,
   getFilesIncrementally,
   removeTrailingSlash,
@@ -26,8 +24,12 @@ server.listen(8080, () => {
 
 wss.on("connection", function connection(ws) {
   ws.on("error", console.error);
-  const userId = uuid.v4();
-  RoomManager.getInstance().addToRoom(userId, ws);
+  ws.on("message", (data: string) => {
+    const { type, clientId } = JSON.parse(data);
+    if (type === "join") {
+      RoomManager.getInstance().addToRoom(clientId, ws);
+    }
+  });
 });
 
 app.get("/files", async (req, res) => {
