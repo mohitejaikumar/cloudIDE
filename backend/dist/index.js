@@ -45,11 +45,17 @@ const uuid_1 = __importDefault(require("uuid"));
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
 const RoomManager_1 = __importDefault(require("./RoomManager"));
+const http_1 = __importDefault(require("http"));
 const helpers_1 = require("./helpers");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-const wss = new ws_1.WebSocketServer({ port: 8080 });
+const server = http_1.default.createServer();
+server.timeout = 0;
+const wss = new ws_1.WebSocketServer({ server });
+server.listen(8080, () => {
+  console.log("Web Socket Server is listening on port 8080");
+});
 wss.on("connection", function connection(ws) {
   ws.on("error", console.error);
   const userId = uuid_1.v4();
