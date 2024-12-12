@@ -65,7 +65,7 @@ server.on("upgrade", (req, socket, head) => {
   const parsedUrl = new URL(req.url!, `https://${req.headers.host}`);
   const ip = parsedUrl.searchParams.get("path"); // Extract the `path` parameter
   const clientId = parsedUrl.searchParams.get("clientId") || "";
-
+  console.log("ClientId .................... ", clientId);
   if (ip) {
     // Construct the WebSocket target URL using the `path` parameter
     const target = `ws://${ip}`;
@@ -85,6 +85,9 @@ server.on("upgrade", (req, socket, head) => {
         ws: true,
         timeout: 0,
         proxyTimeout: 0,
+      });
+      proxy.on("proxyReqWs", (proxyReq, req, socket, options) => {
+        console.log("proxyReqWs .........................................");
       });
       availableProxy.set(clientId, proxy);
     }
