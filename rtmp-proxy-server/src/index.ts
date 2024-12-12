@@ -7,6 +7,8 @@ import { URL } from "url";
 // Create a proxy server instance with WebSocket support enabled
 const proxy = httpProxy.createProxyServer({
   ws: true,
+  timeout: 0,
+  proxyTimeout: 0,
 });
 
 const app = express();

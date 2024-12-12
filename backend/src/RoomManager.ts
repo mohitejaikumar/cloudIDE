@@ -47,6 +47,9 @@ class RoomManager {
   }
 
   addToRoom(userId: string, socket: WebSocket) {
+    console.log("adding to room");
+    console.log(userId);
+    console.log(JSON.stringify(this.users));
     // spawn a new terminal
     var ptyProcess = pty.spawn(shell, [], {
       name: "xterm-color",
@@ -94,6 +97,10 @@ class RoomManager {
     user.socket?.on("message", async (data: string) => {
       console.log("received: %s", data);
       const payload = JSON.parse(data);
+      console.log("users");
+      this.users.forEach((u) => {
+        console.log(u.id);
+      });
       switch (payload.type) {
         case "terminal": {
           user.pty.write(payload.data);
@@ -119,8 +126,6 @@ class RoomManager {
         }
       }
     });
-
-    
   }
 }
 

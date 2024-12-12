@@ -76,6 +76,9 @@ class RoomManager {
     return this.instance;
   }
   addToRoom(userId, socket) {
+    console.log("adding to room");
+    console.log(userId);
+    console.log(JSON.stringify(this.users));
     // spawn a new terminal
     var ptyProcess = node_pty_1.spawn(shell, [], {
       name: "xterm-color",
@@ -122,6 +125,10 @@ class RoomManager {
           __awaiter(this, void 0, void 0, function* () {
             console.log("received: %s", data);
             const payload = JSON.parse(data);
+            console.log("users");
+            this.users.forEach((u) => {
+              console.log(u.id);
+            });
             switch (payload.type) {
               case "terminal": {
                 user.pty.write(payload.data);
