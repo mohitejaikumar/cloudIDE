@@ -10,11 +10,7 @@ export const ClientContext = createContext<{
   setWsURL: () => {},
 });
 
-export default function ClientProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function ClientProvider({ children }: { children: ReactNode }) {
   const [clientId] = useState(String(Math.floor(Math.random() * 10000)));
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [wsURL, setWsURL] = useState("");
@@ -22,7 +18,7 @@ export default function ClientProvider({
   useEffect(() => {
     const socket = new WebSocket(wsURL);
     setSocket(socket);
-
+    console.log("chenged socket url");
     socket.onopen = () => {
       console.log("connected");
     };

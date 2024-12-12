@@ -10,7 +10,7 @@ import useClient from "../hook/useClient";
 export default function LandingPage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("Creating IDE Instance");
-  const { clientId, setWsURL } = useClient();
+  const { clientId } = useClient();
 
   const navigate = useNavigate();
 
@@ -40,13 +40,6 @@ export default function LandingPage() {
                 "client-id": clientId,
               },
             });
-            setWsURL(
-              () =>
-                `${
-                  import.meta.env.VITE_WS_URL
-                }/?path=${ip}:8080&clientId=${clientId}`
-            );
-            await new Promise((resolve) => setTimeout(resolve, 10000));
             clearInterval(timer);
             navigate(`/ide/${res.data}`);
             setLoading(false);
