@@ -23,6 +23,7 @@ export default function ClientProvider({ children }: { children: ReactNode }) {
     const soc = new WebSocket(wsURL);
     soc.onmessage = (event) => {
       const payload = JSON.parse(event.data);
+      console.log("onmessage", payload, socketEmitter);
       socketEmitter.emit(payload.type, payload);
     };
     soc.onopen = () => {
