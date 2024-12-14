@@ -110,6 +110,7 @@ export default function CloudIDE() {
     if (socket == null) return;
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data);
+      console.log(payload);
 
       switch (payload.type) {
         case "filePatch": {
