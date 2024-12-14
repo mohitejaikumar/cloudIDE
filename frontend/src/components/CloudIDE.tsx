@@ -241,16 +241,6 @@ export default function CloudIDE() {
     }
   }, [socket]);
 
-  useEffect(() => {
-    if (!isDragging) return;
-    const video = videoDivRef.current;
-    if (!video) return;
-    window.addEventListener("mousemove", (e) => {
-      video.style.left = `${e.clientX}px`;
-      video.style.top = `${e.clientY}px`;
-    });
-  }, [isDragging]);
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleEditorDidMount(editor: any) {
     editorRef.current = editor;
@@ -352,6 +342,22 @@ export default function CloudIDE() {
     setIsDragging(true);
   }
 
+  function onMouseMove(e: React.MouseEvent) {
+    if (!isDragging) return;
+    const video = videoDivRef.current;
+    if (!video) return;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const postitionX = video.getBoundingClientRect().x;
+    const postitionY = video.getBoundingClientRect().y;
+    let videoPositionX = Math.max(postitionX + e.movementX, 90);
+    videoPositionX = Math.min(videoPositionX, width - 90);
+    let videoPositionY = Math.max(postitionY + e.movementY, 90);
+    videoPositionY = Math.min(videoPositionY, height - 90);
+    console.log(e.movementX, e.movementY);
+    video.style.left = `${videoPositionX}px`;
+    video.style.top = `${videoPositionY}px`;
+  }
   function onMouseUp() {
     setIsDragging(false);
   }
@@ -364,6 +370,7 @@ export default function CloudIDE() {
     <>
       <div
         className="flex flex-col h-screen overflow-y-hidden relative"
+        onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}>
         <div className="w-full h-fit flex justify-between items-center px-10 py-2 bg-black border-b-2 border-b-zinc-600">
           <div className="text-white font-bold text-xl">codeStream</div>
