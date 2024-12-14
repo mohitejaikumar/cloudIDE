@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Terminal as XTerminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -9,6 +9,7 @@ export default function Terminal() {
   const rendered = useRef(false);
   const { clientId, socket } = useClient();
   const fitAddonRef = useRef<FitAddon | null>(null);
+  const [uiTerm, setUiTerm] = useState<XTerminal | null>(null);
 
   function handleResize() {
     if (fitAddonRef.current === null || fitAddonRef.current === undefined) {
@@ -20,24 +21,18 @@ export default function Terminal() {
   }
 
   useEffect(() => {
-    console.log("first render");
-    if (socket === null) {
-      return;
-    }
+    if (socket === null) return;
     rendered.current = true;
 
-    const term = new XTerminal({
-      scrollSensitivity: 0,
-    });
+    const term = new XTerminal();
     const fitAddon = new FitAddon();
-    console.log("fitAddone", fitAddon);
     fitAddonRef.current = fitAddon;
     term.loadAddon(fitAddon);
     term.open(terminalRef.current!);
     fitAddon.fit();
 
     term.onData((data) => {
-      socket.send(
+      socket?.send(
         JSON.stringify({
           type: "terminal",
           data: data,
@@ -45,18 +40,7 @@ export default function Terminal() {
         })
       );
     });
-
-    socket.onmessage = (event) => {
-      const payload = JSON.parse(event.data);
-
-      switch (payload.type) {
-        case "terminal":
-          term.write(payload.data);
-          break;
-        default:
-          break;
-      }
-    };
+    setUiTerm(term);
     const resizeObserver = new ResizeObserver(handleResize);
 
     if (terminalRef.current) {
@@ -70,11 +54,35 @@ export default function Terminal() {
     };
   }, [socket, clientId]);
 
+  useEffect(() => {
+    if (socket && uiTerm) {
+      socket.send(
+        JSON.stringify({
+          type: "terminal",
+          data: "\n",
+          clientId: clientId,
+        })
+      );
+      socket.onmessage = (event) => {
+        const payload = JSON.parse(event.data);
+        switch (payload.type) {
+          case "terminal":
+            uiTerm.write(payload.data);
+            break;
+          default:
+            break;
+        }
+      };
+    }
+  }, [socket, uiTerm, clientId]);
+
   if (socket === null) return <div>Loading ...</div>;
 
   return (
-    <div
-      className="overflow-x-hidden overflow-y-hidden h-full bg-black"
-      ref={terminalRef}></div>
+    <>
+      <div
+        className="overflow-x-hidden overflow-y-hidden h-full bg-black"
+        ref={terminalRef}></div>
+    </>
   );
 }

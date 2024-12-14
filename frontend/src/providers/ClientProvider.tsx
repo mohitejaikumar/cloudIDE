@@ -16,14 +16,14 @@ export default function ClientProvider({ children }: { children: ReactNode }) {
   const [wsURL, setWsURL] = useState("");
 
   useEffect(() => {
-    const socket = new WebSocket(wsURL);
-    console.log("chenged socket url");
-    socket.onopen = () => {
-      setSocket(socket);
-      socket.send(
+    const soc = new WebSocket(wsURL);
+    soc.onopen = () => {
+      console.log("chenged socket url");
+      setSocket(soc);
+      soc.send(
         JSON.stringify({
-            type: "join",
-            clientId: clientId,
+          type: "join",
+          clientId: clientId,
         })
       );
     };
