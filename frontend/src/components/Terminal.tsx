@@ -7,7 +7,7 @@ import useClient from "../hook/useClient";
 export default function Terminal() {
   const terminalRef = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
-  const { clientId, socket, socketEmitter } = useClient();
+  const { clientId, socket, setHandles } = useClient();
   const fitAddonRef = useRef<FitAddon | null>(null);
   const [uiTerm, setUiTerm] = useState<XTerminal | null>(null);
 
@@ -63,9 +63,13 @@ export default function Terminal() {
           clientId: clientId,
         })
       );
-      socketEmitter.on("terminal", (payload) => {
-        console.log("terminal", payload);
-        uiTerm.write(payload.data);
+      setHandles((prevHandles) => {
+        const newHandles = { ...prevHandles };
+        newHandles["terminal"] = (payload) => {
+          console.log("terminal", payload);
+          uiTerm.write(payload.data);
+        };
+        return newHandles;
       });
     }
   }, [socket, uiTerm, clientId]);

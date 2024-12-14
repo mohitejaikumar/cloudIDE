@@ -1,31 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createContext, ReactNode, useEffect, useState } from "react";
-import { EventEmitter } from "eventemitter3";
 
 export const ClientContext = createContext<{
   clientId: string;
   socket: WebSocket | null;
   setWsURL: React.Dispatch<React.SetStateAction<string>>;
-  socketEmitter: EventEmitter;
+  setHandles: React.Dispatch<
+    React.SetStateAction<{ [key: string]: (payload: any) => void }>
+  >;
 }>({
   clientId: "",
   socket: null,
   setWsURL: () => {},
-  socketEmitter: new EventEmitter(),
+  setHandles: () => {},
 });
 
 export default function ClientProvider({ children }: { children: ReactNode }) {
   const [clientId] = useState(String(Math.floor(Math.random() * 10000)));
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [wsURL, setWsURL] = useState("");
-  const socketEmitter = new EventEmitter();
+  const [handles, setHandles] = useState<{
+    [key: string]: (payload: any) => void;
+  }>({});
 
   useEffect(() => {
     const soc = new WebSocket(wsURL);
-    soc.onmessage = (event) => {
-      const payload = JSON.parse(event.data);
-      console.log("onmessage", payload, socketEmitter);
-      socketEmitter.emit(payload.type, payload);
-    };
+
     soc.onopen = () => {
       console.log("chenged socket url");
       setSocket(soc);
@@ -38,13 +38,21 @@ export default function ClientProvider({ children }: { children: ReactNode }) {
     };
   }, [wsURL, clientId]);
 
+  useEffect(() => {
+    if (socket === null) return;
+    socket.onmessage = (event) => {
+      const payload = JSON.parse(event.data);
+      handles[payload.type]?.(payload);
+    };
+  }, [socket, handles]);
+
   return (
     <ClientContext.Provider
       value={{
         clientId,
         socket,
         setWsURL,
-        socketEmitter,
+        setHandles,
       }}>
       {children}
     </ClientContext.Provider>
