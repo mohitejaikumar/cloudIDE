@@ -109,6 +109,7 @@ export default function CloudIDE() {
   useEffect(() => {
     if (socket == null) return;
     console.log("socket", "register onmessage", socket);
+    socket.send(JSON.stringify({ type: "ping" }));
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data);
       console.log(payload);
