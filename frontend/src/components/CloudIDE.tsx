@@ -154,7 +154,7 @@ export default function CloudIDE() {
           break;
       }
     };
-  }, [socket, selectedFileValue, selectedFilePath, getFilesIncrementally]);
+  }, [socket]);
 
   useEffect(() => {
     if (code === null) return;
