@@ -108,6 +108,7 @@ export default function CloudIDE() {
 
   useEffect(() => {
     if (socket == null) return;
+    console.log("socket", "register onmessage", socket);
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data);
       console.log(payload);
