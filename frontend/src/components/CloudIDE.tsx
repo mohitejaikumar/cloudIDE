@@ -18,7 +18,7 @@ export default function CloudIDE() {
   const editorRef = useRef(null);
   const params = useParams();
   const ip = params.id?.replace(/-/g, ".");
-  const { clientId, socket, setWsURL } = useClient();
+  const { clientId, socket, setWsURL, socketEmitter } = useClient();
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [selectedFileValue, setSelectedFileValue] = useState("");
   const [selectedFileLanguage, setSelectedFileLanguage] = useState("");
@@ -109,54 +109,59 @@ export default function CloudIDE() {
   useEffect(() => {
     if (socket == null) return;
     console.log("socket", "register onmessage", socket);
-    socket.send(JSON.stringify({ type: "ping" }));
-    socket.onmessage = (event) => {
-      const payload = JSON.parse(event.data);
-      console.log(payload);
 
-      switch (payload.type) {
-        case "filePatch": {
-          if (payload.filePath !== selectedFilePath) break;
-          const originalValue = selectedFileValue;
-          const patch = applyPatch(originalValue, payload.data);
+    socketEmitter.on("filePatch", (payload) => {
+      console.log("filePatch", payload);
+      if (payload.filePath !== selectedFilePath) return;
+      const originalValue = selectedFileValue;
+      const patch = applyPatch(originalValue, payload.data);
 
-          if (patch) setSelectedFileValue(patch);
-          break;
-        }
-        case "unlinkDir":
-        case "addDir": {
-          const path: string = payload.data;
-          const dirs = path.split("/");
+      if (patch) setSelectedFileValue(patch);
+    });
 
-          const startIndex = dirs.findIndex((item) => item.includes("user"));
-          let finalPath = "";
-          // If 'user' is found, concatenate from that index onwards
-          if (startIndex !== -1) {
-            finalPath = dirs.slice(startIndex, dirs.length - 1).join("/");
-          }
+    socketEmitter.on("unlinkDir", (payload) => {
+      console.log("unlinkDir", payload);
+      if (payload.data !== selectedFilePath) return;
+      setSelectedFilePath(null);
+      setSelectedFileValue("");
+    });
 
-          getFilesIncrementally("/" + finalPath);
-          break;
-        }
-        case "unlink":
-        case "add": {
-          const path: string = payload.data;
-          const dirs = path.split("/");
+    socketEmitter.on("unlink", (payload) => {
+      console.log("unlink", payload);
+      if (payload.data !== selectedFilePath) return;
+      setSelectedFilePath(null);
+      setSelectedFileValue("");
+    });
 
-          const startIndex = dirs.findIndex((item) => item.includes("user"));
-          let finalPath = "";
-          // If 'user' is found, concatenate from that index onwards
-          if (startIndex !== -1) {
-            finalPath = dirs.slice(startIndex, dirs.length - 1).join("/");
-          }
+    socketEmitter.on("addDir", (payload) => {
+      console.log("addDir", payload);
+      const path: string = payload.data;
+      const dirs = path.split("/");
 
-          getFilesIncrementally("/" + finalPath);
-          break;
-        }
-        default:
-          break;
+      const startIndex = dirs.findIndex((item) => item.includes("user"));
+      let finalPath = "";
+      // If 'user' is found, concatenate from that index onwards
+      if (startIndex !== -1) {
+        finalPath = dirs.slice(startIndex, dirs.length - 1).join("/");
       }
-    };
+
+      getFilesIncrementally("/" + finalPath);
+    });
+
+    socketEmitter.on("add", (payload) => {
+      console.log("add", payload);
+      const path: string = payload.data;
+      const dirs = path.split("/");
+
+      const startIndex = dirs.findIndex((item) => item.includes("user"));
+      let finalPath = "";
+      // If 'user' is found, concatenate from that index onwards
+      if (startIndex !== -1) {
+        finalPath = dirs.slice(startIndex, dirs.length - 1).join("/");
+      }
+
+      getFilesIncrementally("/" + finalPath);
+    });
   }, [socket]);
 
   useEffect(() => {
