@@ -152,7 +152,13 @@ export default function CloudIDE() {
 
       return newHandles;
     });
-  }, [socket]);
+  }, [
+    socket,
+    selectedFileValue,
+    getFilesIncrementally,
+    selectedFilePath,
+    setHandles,
+  ]);
 
   useEffect(() => {
     if (code === null) return;
@@ -183,7 +189,7 @@ export default function CloudIDE() {
     return () => {
       clearTimeout(timer);
     };
-  }, [code, selectedFileValue, selectedFilePath, socket]);
+  }, [code, selectedFileValue, selectedFilePath, socket, clientId]);
 
   useEffect(() => {
     if (initStreaming) {
